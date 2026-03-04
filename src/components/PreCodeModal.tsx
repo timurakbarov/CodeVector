@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Activity, Zap, Stethoscope, AlertTriangle, Map, LayoutList } from 'lucide-react';
 import { AppMode, RhythmType, ViewMode } from '../state/codeState';
 
@@ -12,6 +12,16 @@ export const PreCodeModal: React.FC<PreCodeModalProps> = ({ onStart }) => {
     const [airwayReady, setAirwayReady] = useState(false);
 
     const allChecked = fullCode && defibReady && airwayReady;
+
+    const optionsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (allChecked && optionsRef.current) {
+            setTimeout(() => {
+                optionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+    }, [allChecked]);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/90 backdrop-blur-sm p-4">
@@ -64,7 +74,7 @@ export const PreCodeModal: React.FC<PreCodeModalProps> = ({ onStart }) => {
                 </div>
 
                 {allChecked && (
-                    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div ref={optionsRef} className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h2 className="text-xl font-semibold text-gray-300 pt-4 border-t border-gray-800">Select Operating Mode</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">

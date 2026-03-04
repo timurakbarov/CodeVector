@@ -30,6 +30,7 @@ export interface CodeState {
     rosCachieved: boolean;
     codeEnded: boolean;
     viewMode: ViewMode;
+    shockCount: number;
     airwayGatekeeperCleared: boolean;
     history: CodeState[];
 }
@@ -53,6 +54,7 @@ export const initialState: CodeState = {
     rosCachieved: false,
     codeEnded: false,
     viewMode: 'map',
+    shockCount: 0,
     airwayGatekeeperCleared: false,
     history: [],
 };
@@ -121,6 +123,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 ...state,
                 currentNodeId: action.payload.nextNodeId,
                 cprTimerSecondsRemaining: 120,
+                shockCount: state.shockCount + 1,
                 events: [
                     ...state.events,
                     createLog(`Shock Delivered`, action.payload.energy || `200 J`)

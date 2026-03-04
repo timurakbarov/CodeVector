@@ -251,7 +251,7 @@ const App: React.FC = () => {
         </div>
 
       </div>
-      {state.cprCycleCount === 1 && !state.airwayGatekeeperCleared && !state.codeEnded && (
+      {state.shockCount === 2 && !state.airwayGatekeeperCleared && !state.codeEnded && (
         <AirwayGatekeeperModal onClear={() => dispatch({ type: 'CLEAR_AIRWAY_GATEKEEPER' })} />
       )}
     </>

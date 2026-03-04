@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { Zap, ZapOff } from 'lucide-react';
 import { CodeState, CodeAction } from '../state/codeState';
 
 interface WizardViewProps {
@@ -10,6 +11,7 @@ interface OptionConfig {
     label: string;
     action: () => void;
     color?: string;
+    icon?: React.ReactNode;
 }
 
 interface WizardConfig {
@@ -27,10 +29,12 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
 
         const checkShockable = {
             label: 'Shockable \u2014 VF or pulseless VT',
+            icon: <Zap className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />,
             action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'shockable', nextNodeId: 'BOX_2_VF_PVT' } })
         };
         const checkNonShockable = {
             label: 'Non-shockable \u2014 PEA or Asystole',
+            icon: <ZapOff className="w-8 h-8 md:w-10 md:h-10 text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-pulse" />,
             action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_9_ASYSTOLE_PEA' } })
         };
         const checkRosc: OptionConfig = {
@@ -44,7 +48,7 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                 return {
                     title: 'CARDIAC ARREST CONFIRMED',
                     bullets: [
-                        'Call resuscitation team / 999 NOW',
+                        'Call resuscitation team / call code blue',
                         'Begin CPR immediately (30:2)',
                         'Give Oxygen & Attach monitor/defibrillator'
                     ],
@@ -160,22 +164,23 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
     };
 
     const config: WizardConfig = getConfig();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [state.currentNodeId]);
 
     return (
-        <div className="flex-1 flex flex-col items-center bg-black p-4 md:p-8 relative overflow-y-auto w-full h-full">
+        <div ref={containerRef} className="flex-1 flex flex-col items-center bg-black p-4 md:p-8 relative overflow-y-auto w-full h-full">
             <div className="w-full max-w-4xl flex flex-col gap-8 md:gap-12 mt-4 md:mt-8 pb-32">
 
                 {/* Card Container - True Black Styling */}
                 <div className="bg-gray-950 border border-gray-800 rounded-3xl overflow-hidden flex flex-col w-full shadow-2xl">
                     <div className="w-full h-1.5 bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.9)]" />
 
-                    <div className="p-8 md:p-12 flex flex-col gap-8">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-3 text-indigo-400 font-bold uppercase tracking-widest text-sm md:text-base">
-                                <span className="text-xl">?</span> CLINICAL QUESTION
-                            </div>
-                        </div>
-
+                    <div className="p-8 md:p-12 flex flex-col gap-6">
                         <h1 className="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-tight leading-tight">
                             {config.title}
                         </h1>
@@ -203,10 +208,10 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                         <button
                             key={idx}
                             onClick={opt.action}
-                            className={`flex items-center gap-6 p-6 md:p-8 rounded-2xl border-2 bg-gray-950 transition-all text-left shadow-lg ${opt.color ? opt.color : 'text-gray-100 border-gray-700 hover:border-indigo-500 hover:bg-gray-900'}`}
+                            className={`flex items-center gap-6 p-6 md:p-8 rounded-2xl border-2 bg-gray-950 transition-all text-left shadow-lg group ${opt.color ? opt.color : 'text-gray-100 border-gray-700 hover:border-indigo-500 hover:bg-gray-900'}`}
                         >
-                            <div className={`w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-xl md:text-2xl ${opt.color ? opt.color.replace('text-', 'border-') : 'border-gray-500 text-gray-400'}`}>
-                                {getLetter(idx)}
+                            <div className={`w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-xl md:text-2xl transition-colors ${opt.color ? opt.color.replace('text-', 'border-') : 'border-gray-500 text-gray-400 group-hover:border-indigo-500 group-hover:text-indigo-400'}`}>
+                                {opt.icon ? opt.icon : getLetter(idx)}
                             </div>
                             <span className="text-2xl md:text-3xl font-semibold leading-tight">
                                 {opt.label}
