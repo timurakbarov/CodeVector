@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-green: #39ff14;
+}
+
+@layer base {
+  body {
+    background-color: #111827; /* gray-900 */
+    color: #f3f4f6; /* gray-100 */
+  }
+}
