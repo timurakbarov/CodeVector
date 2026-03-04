@@ -251,12 +251,18 @@ const App: React.FC = () => {
         </div>
 
       </div>
-      {state.shockCount === 2 && !state.airwayGatekeeperCleared && !state.codeEnded && (
-        <AirwayGatekeeperModal onClear={() => dispatch({ type: 'CLEAR_AIRWAY_GATEKEEPER' })} />
-      )}
-      {state.showHsTsModal && (
-        <HsTsModal onClear={() => dispatch({ type: 'TOGGLE_HS_TS_MODAL' })} />
-      )}
+      {(!state.airwayGatekeeperCleared && !state.codeEnded && (
+        (state.rhythmType === 'shockable' && state.shockCount >= 2) ||
+        (state.rhythmType === 'nonShockable' && state.cprCycleCount >= 1)
+      )) && (
+          <AirwayGatekeeperModal onClear={() => dispatch({ type: 'CLEAR_AIRWAY_GATEKEEPER' })} />
+        )}
+      {(state.showHsTsModal || (!state.hsTsModalCleared && !state.codeEnded && (
+        (state.rhythmType === 'shockable' && state.shockCount >= 3) ||
+        (state.rhythmType === 'nonShockable' && state.cprCycleCount >= 2)
+      ))) && (
+          <HsTsModal onClear={() => dispatch({ type: 'CLEAR_HS_TS_MODAL' })} />
+        )}
     </>
   );
 };
