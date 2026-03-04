@@ -29,13 +29,13 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
 
         const checkShockable = {
             label: 'Shockable \u2014 VF or pulseless VT',
-            icon: <Zap className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse" />,
-            action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'shockable', nextNodeId: 'BOX_2_VF_PVT' } })
+            action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'shockable', nextNodeId: 'BOX_2_VF_PVT' } }),
+            isShockable: true
         };
         const checkNonShockable = {
             label: 'Non-shockable \u2014 PEA or Asystole',
-            icon: <ZapOff className="w-8 h-8 md:w-10 md:h-10 text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-pulse" />,
-            action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_9_ASYSTOLE_PEA' } })
+            action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_9_ASYSTOLE_PEA' } }),
+            isNonShockable: true
         };
         const checkRosc: OptionConfig = {
             label: 'ROSC \u2014 Organised rhythm with palpable pulse',
@@ -103,7 +103,8 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                             action: () => {
                                 const map: Record<string, string> = { 'BOX_4_CPR_2_MIN': 'BOX_5_SHOCK', 'BOX_6_CPR_EPI': 'BOX_7_SHOCK', 'BOX_8_CPR_AMIO': 'BOX_5_SHOCK' };
                                 dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'shockable', nextNodeId: map[id] || 'BOX_5_SHOCK' } });
-                            }
+                            },
+                            isShockable: true
                         },
                         checkNonShockable
                     ]
@@ -137,7 +138,7 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                     question: 'After 2 min CPR \u2014 check rhythm:',
                     options: [
                         checkShockable,
-                        { label: 'Still non-shockable \u2014 PEA or Asystole', action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_11_CPR_2_MIN_NONSHOCK' } }) }
+                        { label: 'Still non-shockable \u2014 PEA or Asystole', action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_11_CPR_2_MIN_NONSHOCK' } }), isNonShockable: true }
                     ]
                 };
 
@@ -165,6 +166,15 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
 
     const config: WizardConfig = getConfig();
     const containerRef = useRef<HTMLDivElement>(null);
+    const [selectedIdx, setSelectedIdx] = React.useState<number | null>(null);
+
+    const handleOptionClick = (idx: number, opt: OptionConfig) => {
+        setSelectedIdx(idx);
+        setTimeout(() => {
+            opt.action();
+            setSelectedIdx(null);
+        }, 150); // slight delay to show the neon glow
+    };
 
     useEffect(() => {
         if (containerRef.current) {
@@ -204,20 +214,48 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
 
                 {/* Options Stack */}
                 <div className="flex flex-col gap-4 md:gap-6 w-full">
-                    {config.options.map((opt, idx) => (
-                        <button
-                            key={idx}
-                            onClick={opt.action}
-                            className={`flex items-center gap-6 p-6 md:p-8 rounded-2xl border-2 bg-gray-950 transition-all text-left shadow-lg group ${opt.color ? opt.color : 'text-gray-100 border-gray-700 hover:border-indigo-500 hover:bg-gray-900'}`}
-                        >
-                            <div className={`w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-xl md:text-2xl transition-colors ${opt.color ? opt.color.replace('text-', 'border-') : 'border-gray-500 text-gray-400 group-hover:border-indigo-500 group-hover:text-indigo-400'}`}>
-                                {opt.icon ? opt.icon : getLetter(idx)}
-                            </div>
-                            <span className="text-2xl md:text-3xl font-semibold leading-tight">
-                                {opt.label}
-                            </span>
-                        </button>
-                    ))}
+                    {config.options.map((opt, idx) => {
+                        const isChosen = selectedIdx === idx;
+                        const isShockToggle = (opt as any).isShockable;
+                        const isNonShockToggle = (opt as any).isNonShockable;
+
+                        let bgClass = 'bg-gray-950 border-gray-700';
+                        let textClass = opt.color ? opt.color : 'text-gray-100 hover:border-indigo-500 hover:bg-gray-900';
+                        let iconClass = 'border-gray-500 text-gray-400 group-hover:border-indigo-500 group-hover:text-indigo-400';
+                        let iconNode = opt.icon ? opt.icon : getLetter(idx);
+
+                        if (isShockToggle) {
+                            iconNode = <Zap className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-cyan-300' : 'text-cyan-600/60 transition-colors'}`} />;
+                        } else if (isNonShockToggle) {
+                            iconNode = <ZapOff className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-green-300' : 'text-green-600/60 transition-colors'}`} />;
+                        }
+
+                        if (isChosen && isShockToggle) {
+                            bgClass = 'bg-cyan-950/40 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.6)]';
+                            iconClass = 'border-cyan-400 text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,1)]';
+                        } else if (isChosen && isNonShockToggle) {
+                            bgClass = 'bg-green-950/40 border-green-400 shadow-[0_0_30px_rgba(74,222,128,0.6)]';
+                            iconClass = 'border-green-400 text-green-300 drop-shadow-[0_0_10px_rgba(74,222,128,1)]';
+                        } else if (isChosen) {
+                            bgClass = 'bg-indigo-950/40 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.6)]';
+                            iconClass = 'border-indigo-400 text-indigo-300 drop-shadow-[0_0_10px_rgba(99,102,241,1)]';
+                        }
+
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => handleOptionClick(idx, opt)}
+                                className={`flex items-center gap-6 p-6 md:p-8 rounded-2xl border-2 transition-all duration-150 text-left shadow-lg group ${bgClass} ${textClass}`}
+                            >
+                                <div className={`w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-xl md:text-2xl transition-all ${iconClass}`}>
+                                    {iconNode}
+                                </div>
+                                <span className="text-2xl md:text-3xl font-semibold leading-tight">
+                                    {opt.label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
 
             </div>

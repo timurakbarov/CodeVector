@@ -3,11 +3,12 @@ import { codeReducer, initialState, RhythmType, AppMode, ViewMode } from './stat
 import { getNextShockableNode, AHA_ALGORITHM_NODES } from './data/algorithm';
 import { PreCodeModal } from './components/PreCodeModal';
 import { Flowchart } from './components/Flowchart';
-import { HsAndTsSidebar, DrugsSidebar } from './components/Sidebars';
+import { DrugsSidebar } from './components/Sidebars';
 import { EventLog } from './components/EventLog';
 import { SummaryView } from './components/SummaryView';
 import { WizardView } from './components/WizardView';
 import { AirwayGatekeeperModal } from './components/AirwayGatekeeperModal';
+import { HsTsModal } from './components/HsTsModal';
 import { Activity, LayoutList, Map as MapIcon, RotateCcw } from 'lucide-react';
 
 class Metronome {
@@ -178,8 +179,7 @@ const App: React.FC = () => {
         {/* MIDDLE: Mobile Tabbed vs Desktop Sidebars */}
         <div className="flex-1 w-full flex bg-black relative overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
 
-          {/* Left Panel / Mobile Bottom Drawer */}
-          <HsAndTsSidebar state={state} dispatch={dispatch} />
+          {/* Left Panel / Mobile Bottom Drawer Removed in V7 -> Uses HsTsModal instead */}
 
           {/* Central Flowchart Layout Wrapping */}
           <div className={`flex-1 flex flex-col relative ${activeTab === 'log' ? 'hidden md:flex' : 'flex'}`}>
@@ -253,6 +253,9 @@ const App: React.FC = () => {
       </div>
       {state.shockCount === 2 && !state.airwayGatekeeperCleared && !state.codeEnded && (
         <AirwayGatekeeperModal onClear={() => dispatch({ type: 'CLEAR_AIRWAY_GATEKEEPER' })} />
+      )}
+      {state.showHsTsModal && (
+        <HsTsModal onClear={() => dispatch({ type: 'TOGGLE_HS_TS_MODAL' })} />
       )}
     </>
   );

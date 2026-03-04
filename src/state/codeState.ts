@@ -32,6 +32,7 @@ export interface CodeState {
     viewMode: ViewMode;
     shockCount: number;
     airwayGatekeeperCleared: boolean;
+    showHsTsModal: boolean;
     history: CodeState[];
 }
 
@@ -56,6 +57,7 @@ export const initialState: CodeState = {
     viewMode: 'map',
     shockCount: 0,
     airwayGatekeeperCleared: false,
+    showHsTsModal: false,
     history: [],
 };
 
@@ -76,6 +78,7 @@ export type CodeAction =
     | { type: 'ADD_LOG'; payload: { label: string; details?: string } }
     | { type: 'SET_VIEW_MODE'; payload: { mode: ViewMode } }
     | { type: 'CLEAR_AIRWAY_GATEKEEPER' }
+    | { type: 'TOGGLE_HS_TS_MODAL' }
     | { type: 'UNDO_LAST_ACTION' };
 
 // Generic node jumps are no longer visibly tracked in the medical record to reduce clutter.
@@ -250,6 +253,12 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                     ...state.events,
                     createLog('Airway Gatekeeper Cleared', 'Intubation checklist confirmed')
                 ]
+            };
+
+        case 'TOGGLE_HS_TS_MODAL':
+            return {
+                ...state,
+                showHsTsModal: !state.showHsTsModal
             };
 
         case 'UNDO_LAST_ACTION':
