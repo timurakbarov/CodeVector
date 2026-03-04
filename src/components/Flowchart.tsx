@@ -10,25 +10,25 @@ interface FlowchartProps {
 
 // Rigid, perfect grid layout matching AHA guidelines 
 const LAYOUT: Record<string, { x: number; y: number }> = {
-    BOX_1_START_CPR: { x: 50, y: 5 },
+    BOX_1_START_CPR: { x: 50, y: 3 },
 
     // Shockable (Left Column)
-    BOX_2_VF_PVT: { x: 25, y: 15 },
-    BOX_3_SHOCK: { x: 25, y: 25 },
-    BOX_4_CPR_2_MIN: { x: 25, y: 40 },
-    BOX_5_SHOCK: { x: 25, y: 55 },
-    BOX_6_CPR_EPI: { x: 25, y: 70 },
-    BOX_7_SHOCK: { x: 25, y: 85 },
-    BOX_8_CPR_AMIO: { x: 25, y: 100 },
+    BOX_2_VF_PVT: { x: 20, y: 15 },
+    BOX_3_SHOCK: { x: 20, y: 27 },
+    BOX_4_CPR_2_MIN: { x: 20, y: 44 },
+    BOX_5_SHOCK: { x: 20, y: 61 },
+    BOX_6_CPR_EPI: { x: 20, y: 78 },
+    BOX_7_SHOCK: { x: 20, y: 95 },
+    BOX_8_CPR_AMIO: { x: 20, y: 112 },
 
     // Non-Shockable (Right Column)
-    BOX_9_ASYSTOLE_PEA: { x: 75, y: 15 },
-    BOX_10_EPI_ASAP: { x: 75, y: 25 },
-    BOX_11_CPR_2_MIN_NONSHOCK: { x: 75, y: 40 },
-    BOX_11_TREAT_CAUSES: { x: 75, y: 55 },
+    BOX_9_ASYSTOLE_PEA: { x: 80, y: 15 },
+    BOX_10_EPI_ASAP: { x: 80, y: 27 },
+    BOX_11_CPR_2_MIN_NONSHOCK: { x: 80, y: 44 },
+    BOX_11_TREAT_CAUSES: { x: 80, y: 61 },
 
     // Terminal
-    BOX_12_ROSC_OR_TERMINATE: { x: 50, y: 110 }
+    BOX_12_ROSC_OR_TERMINATE: { x: 50, y: 125 }
 };
 
 const generateSegments = (points: string[]) => {
@@ -60,12 +60,12 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
     return (
         <div className="relative w-full h-full max-w-6xl mx-auto rounded-xl overflow-hidden bg-gray-950 border border-gray-800 shadow-inner">
             <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar pb-32">
-                <div className="relative w-full min-h-[1200px] mt-8">
+                <div className="relative w-full min-h-[1600px] mt-8">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
                         <defs>
-                            <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#4B5563" /></marker>
-                            <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#EF4444" /></marker>
-                            <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3B82F6" /></marker>
+                            <marker id="arrow-gray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4B5563" /></marker>
+                            <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#EF4444" opacity="0.8" /></marker>
+                            <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3B82F6" opacity="0.8" /></marker>
                         </defs>
 
                         {AHA_ALGORITHM_EDGES.map((edge, idx) => {
@@ -76,29 +76,31 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                             const color = getEdgeColor(edge.fromNodeId, edge.toNodeId);
                             const markerRef = color === '#EF4444' ? 'url(#arrow-red)' : color === '#3B82F6' ? 'url(#arrow-blue)' : 'url(#arrow-gray)';
 
-                            let points = [`${from.x}%,${from.y}%`, `${to.x}%,${to.y}%`];
+                            // Subtracting ~3% from the target Y so arrows never cross box borders visually
+                            let targetY = to.y - 3;
+                            let points = [`${from.x}%,${from.y + 3}%`, `${to.x}%,${targetY}%`];
 
                             // Orthogonal adjustments to perfectly avoid crossing lines and diagonals
                             if (from.x !== to.x && from.y !== to.y) {
                                 if (edge.toNodeId === 'BOX_2_VF_PVT') {
-                                    points = [`${from.x}%,${from.y}%`, `${to.x}%,${from.y}%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y + 3}%`, `${to.x}%,${from.y + 3}%`, `${to.x}%,${targetY}%`];
                                 } else if (edge.toNodeId === 'BOX_9_ASYSTOLE_PEA' && edge.fromNodeId === 'BOX_1_START_CPR') {
-                                    points = [`${from.x}%,${from.y}%`, `${to.x}%,${from.y}%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y + 3}%`, `${to.x}%,${from.y + 3}%`, `${to.x}%,${targetY}%`];
                                 } else if (edge.toNodeId === 'BOX_12_ROSC_OR_TERMINATE') {
                                     // Drop down directly below, then slide to center center
-                                    points = [`${from.x}%,${from.y}%`, `${from.x}%,105%`, `50%,105%`, `50%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y}%`, `${from.x}%,120%`, `50%,120%`, `50%,${targetY}%`];
                                 } else if (edge.fromNodeId === 'BOX_11_CPR_2_MIN_NONSHOCK' && edge.toNodeId === 'BOX_5_SHOCK') {
                                     // non-shockable to shockable wrap around
-                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,108%`, `10%,108%`, `10%,${to.y}%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,123%`, `5%,123%`, `5%,${targetY}%`, `${to.x}%,${targetY}%`];
                                 } else if (edge.fromNodeId === 'BOX_11_TREAT_CAUSES' && edge.toNodeId === 'BOX_5_SHOCK') {
                                     // non-shockable to shockable wrap around
-                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,108%`, `10%,108%`, `10%,${to.y}%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,123%`, `5%,123%`, `5%,${targetY}%`, `${to.x}%,${targetY}%`];
                                 } else if (edge.fromNodeId === 'BOX_11_TREAT_CAUSES' && edge.toNodeId === 'BOX_11_CPR_2_MIN_NONSHOCK') {
                                     // loop back up non-shockable path
-                                    points = [`${from.x}%,${from.y}%`, `88%,${from.y}%`, `88%,35%`, `${to.x}%,35%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y}%`, `90%,${from.y}%`, `90%,40%`, `${to.x}%,40%`, `${to.x}%,${targetY}%`];
                                 } else if (edge.fromNodeId === 'BOX_8_CPR_AMIO' && edge.toNodeId === 'BOX_5_SHOCK') {
                                     // Loop back up the shockable path
-                                    points = [`${from.x}%,${from.y}%`, `12%,${from.y}%`, `12%,50%`, `${to.x}%,50%`, `${to.x}%,${to.y}%`];
+                                    points = [`${from.x}%,${from.y}%`, `10%,${from.y}%`, `10%,56%`, `${to.x}%,56%`, `${to.x}%,${targetY}%`];
                                 }
                             }
 
@@ -112,6 +114,7 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                                             x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
                                             stroke={color}
                                             strokeWidth="2"
+                                            strokeOpacity="0.8"
                                             markerEnd={sIdx === segments.length - 1 ? markerRef : undefined}
                                         />
                                     ))}

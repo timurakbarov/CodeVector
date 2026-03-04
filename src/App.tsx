@@ -150,14 +150,24 @@ const App: React.FC = () => {
         {/* Left Panel / Mobile Bottom Drawer */}
         <HsAndTsSidebar state={state} dispatch={dispatch} />
 
-        {/* Central Flowchart */}
-        <div className={`flex-1 overflow-auto relative border-r border-l border-gray-800 ${activeTab === 'log' ? 'hidden md:block' : 'block'}`}>
-          <Flowchart currentNodeId={state.currentNodeId} onNodeTap={handleNodeTap} onDeliverShock={handleDeliverShock} rhythm={state.rhythmType} />
+        {/* Central Flowchart Layout Wrapping */}
+        <div className={`flex-1 flex flex-col relative ${activeTab === 'log' ? 'hidden md:flex' : 'flex'}`}>
+          {/* V5: Mobile Permanent Drugs Bar (Top of Flowchart) */}
+          <div className="md:hidden border-b border-gray-800 shrink-0">
+            <DrugsSidebar state={state} dispatch={dispatch} />
+          </div>
+
+          <div className="flex-1 overflow-auto border-r border-l border-gray-800">
+            <Flowchart currentNodeId={state.currentNodeId} onNodeTap={handleNodeTap} onDeliverShock={handleDeliverShock} rhythm={state.rhythmType} />
+          </div>
         </div>
 
-        {/* Right Panel: Drugs & Event Log */}
+        {/* Right Panel: Desktop Sidebars / Mobile Event Log */}
         <div className={`w-full md:w-[380px] h-full shrink-0 flex flex-col bg-gray-900 border-l border-gray-800 overflow-hidden ${activeTab === 'flowchart' ? 'hidden md:flex' : 'flex'}`}>
-          <DrugsSidebar state={state} dispatch={dispatch} />
+          {/* Hide DrugsSidebar in the tab view for mobile since it's above flowchart now */}
+          <div className="hidden md:block">
+            <DrugsSidebar state={state} dispatch={dispatch} />
+          </div>
           <div className="flex-1 overflow-y-auto">
             <EventLog events={state.events} codeStartTime={state.codeStartTime} />
           </div>
@@ -183,9 +193,9 @@ const App: React.FC = () => {
       {/* FOOTER: Controls */}
       <div className="h-[10vh] max-h-[80px] border-t border-gray-800 bg-black flex items-center justify-center gap-4 md:gap-8 shrink-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
         <button onClick={() => dispatch({ type: 'TOGGLE_METRONOME' })} disabled={state.codeEnded}
-          className={`hidden md:flex items-center gap-2 px-6 py-3 rounded-full font-semibold border-2 transition-all ${state.metronomeEnabled ? 'bg-neon-green/20 border-neon-green text-neon-green shadow-lg scale-105' : 'bg-gray-900 border-gray-800 text-gray-400'}`}
+          className={`flex items-center justify-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full font-semibold border-2 transition-all ${state.metronomeEnabled ? 'bg-neon-green/20 border-neon-green text-neon-green shadow-[0_0_10px_rgba(57,255,20,0.5)] scale-105' : 'bg-gray-900 border-gray-800 text-gray-400'} text-xs md:text-base`}
           style={state.metronomeEnabled ? { color: 'var(--color-neon-green)', borderColor: 'var(--color-neon-green)' } : undefined}>
-          <Activity className="w-5 h-5" /> Metronome {state.metronomeEnabled ? 'ON' : 'OFF'}
+          <Activity className="w-4 h-4 md:w-5 md:h-5" /> Metronome {state.metronomeEnabled ? 'ON' : 'OFF'}
         </button>
 
         <div className="hidden md:block w-px h-10 bg-gray-800" />

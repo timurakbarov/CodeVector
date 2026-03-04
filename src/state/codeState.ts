@@ -66,24 +66,8 @@ export type CodeAction =
     | { type: 'JUMP_NODE'; payload: { nodeId: string } }
     | { type: 'ADD_LOG'; payload: { label: string; details?: string } };
 
-const getHumaneNodeLabel = (nodeId: string) => {
-    const map: Record<string, string> = {
-        'BOX_1_START_CPR': 'Box 1: Start CPR',
-        'BOX_2_VF_PVT': 'Box 2: VF/pVT (Shockable)',
-        'BOX_3_SHOCK': 'Box 3: Deliver Shock',
-        'BOX_4_CPR_2_MIN': 'Box 4: CPR 2 min',
-        'BOX_5_SHOCK': 'Box 5: Deliver Shock',
-        'BOX_6_CPR_EPI': 'Box 6: CPR 2 min',
-        'BOX_7_SHOCK': 'Box 7: Deliver Shock',
-        'BOX_8_CPR_AMIO': 'Box 8: CPR 2 min',
-        'BOX_9_ASYSTOLE_PEA': 'Box 9: Asystole/PEA (Non-Shockable)',
-        'BOX_10_EPI_ASAP': 'Box 10: Epinephrine ASAP',
-        'BOX_11_CPR_2_MIN_NONSHOCK': 'Box 10: CPR 2 min',
-        'BOX_11_TREAT_CAUSES': 'Box 11: Treat Causes',
-        'BOX_12_ROSC_OR_TERMINATE': 'Box 12: ROSC or Terminate'
-    };
-    return map[nodeId] || nodeId;
-};
+// Generic node jumps are no longer visibly tracked in the medical record to reduce clutter.
+// Only explicitly triggered physiological events (CPR, Meds, Shocks, ROSC) are kept.
 
 const createLog = (label: string, details?: string): LogEvent => ({
     id: crypto.randomUUID(),
@@ -103,7 +87,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 codeStartTime: new Date(),
                 events: [
                     ...state.events,
-                    createLog(`Box 1: Start CPR (Live Code Initialized)`)
+                    createLog(`CPR Started (30:2)`)
                 ]
             };
 
@@ -118,7 +102,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 cprTimerSecondsRemaining: 120,
                 events: [
                     ...state.events,
-                    createLog(`Box ${state.currentNodeId === 'BOX_2_VF_PVT' ? '3' : state.currentNodeId === 'BOX_4_CPR_2_MIN' ? '5' : '7'}: Shock Delivered`)
+                    createLog(`Shock Delivered`, action.payload.energy || `200 J`)
                 ]
             };
 
@@ -131,7 +115,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 epiCooldownSecondsRemaining: 240, // 4-minute autotrigger
                 events: [
                     ...state.events,
-                    createLog(state.currentNodeId === 'BOX_9_ASYSTOLE_PEA' ? `Box 10: Epinephrine 1mg Administered` : `Box 6: CPR & Epinephrine 1mg Administered`)
+                    createLog(`Epinephrine Administered`, `1 mg IV/IO`)
                 ]
             };
 
@@ -145,7 +129,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 amioDoses: nextDose,
                 events: [
                     ...state.events,
-                    createLog(`Box 8: Amiodarone ${amount} Administered`)
+                    createLog(`Amiodarone Administered`, `${amount} IV/IO`)
                 ]
             };
 
@@ -224,13 +208,11 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
             };
 
         case 'JUMP_NODE':
+            // We consciously DO NOT emit a medical record line for touching the flowchart 
+            // to keep the log strictly focused on physical medical actions (shocks, meds, cpr resets, rhythms)
             return {
                 ...state,
-                currentNodeId: action.payload.nodeId,
-                events: [
-                    ...state.events,
-                    createLog(`Algorithm Target Change`, getHumaneNodeLabel(action.payload.nodeId))
-                ]
+                currentNodeId: action.payload.nodeId
             };
 
         case 'ADD_LOG':

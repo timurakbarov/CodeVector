@@ -15,7 +15,7 @@ export const PreCodeModal: React.FC<PreCodeModalProps> = ({ onStart }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/90 backdrop-blur-sm p-4">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl max-w-2xl w-full p-8 text-gray-100 flex flex-col gap-8">
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl max-w-2xl w-full p-6 md:p-8 text-gray-100 flex flex-col gap-6 md:gap-8 max-h-[95vh] overflow-y-auto custom-scrollbar">
                 <div className="flex items-center gap-4 border-b border-gray-800 pb-4">
                     <Activity className="w-10 h-10 text-neon-green" style={{ color: 'var(--color-neon-green)' }} />
                     <h1 className="text-3xl font-bold tracking-tight">ACLS Code Protocol</h1>

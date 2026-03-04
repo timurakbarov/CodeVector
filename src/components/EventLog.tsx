@@ -8,7 +8,7 @@ interface EventLogProps {
 }
 
 const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return date.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
 };
 
 export const EventLog: React.FC<EventLogProps> = ({ events }) => {
