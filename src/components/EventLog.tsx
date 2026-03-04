@@ -32,10 +32,13 @@ export const EventLog: React.FC<EventLogProps> = ({ events }) => {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar bg-black/20">
                 {events.map((evt) => (
                     <div key={evt.id} className="text-sm pb-3 font-mono border-b border-gray-800/50 last:border-0 leading-relaxed">
-                        <span className="text-neon-green opacity-90 font-bold block mb-1" style={{ color: 'var(--color-neon-green)' }}>
-                            [{formatTime(evt.timestamp)}]
-                        </span>
-                        <div className="text-gray-100 font-semibold text-base">{evt.label}</div>
+                        <div className="flex items-center gap-2 text-gray-100 font-semibold text-base">
+                            <span className="text-neon-green opacity-90 font-bold tracking-widest" style={{ color: 'var(--color-neon-green)' }}>
+                                [{formatTime(evt.timestamp)}]
+                            </span>
+                            <span>-</span>
+                            <span>{evt.label}</span>
+                        </div>
                         {evt.details && (
                             <div className="text-gray-400 text-sm mt-1">{evt.details}</div>
                         )}

@@ -2,6 +2,7 @@ import { Reducer } from 'react';
 
 export type RhythmType = 'unknown' | 'shockable' | 'nonShockable';
 export type AppMode = 'training' | 'live';
+export type ViewMode = 'map' | 'wizard';
 
 export interface LogEvent {
     id: string;
@@ -28,6 +29,9 @@ export interface CodeState {
     metronomeEnabled: boolean;
     rosCachieved: boolean;
     codeEnded: boolean;
+    viewMode: ViewMode;
+    airwayGatekeeperCleared: boolean;
+    history: CodeState[];
 }
 
 export const initialState: CodeState = {
@@ -48,6 +52,9 @@ export const initialState: CodeState = {
     metronomeEnabled: false,
     rosCachieved: false,
     codeEnded: false,
+    viewMode: 'map',
+    airwayGatekeeperCleared: false,
+    history: [],
 };
 
 export type CodeAction =
@@ -64,7 +71,10 @@ export type CodeAction =
     | { type: 'ACHIEVE_ROSC' }
     | { type: 'TERMINATE_CODE' }
     | { type: 'JUMP_NODE'; payload: { nodeId: string } }
-    | { type: 'ADD_LOG'; payload: { label: string; details?: string } };
+    | { type: 'ADD_LOG'; payload: { label: string; details?: string } }
+    | { type: 'SET_VIEW_MODE'; payload: { mode: ViewMode } }
+    | { type: 'CLEAR_AIRWAY_GATEKEEPER' }
+    | { type: 'UNDO_LAST_ACTION' };
 
 // Generic node jumps are no longer visibly tracked in the medical record to reduce clutter.
 // Only explicitly triggered physiological events (CPR, Meds, Shocks, ROSC) are kept.
@@ -77,6 +87,16 @@ const createLog = (label: string, details?: string): LogEvent => ({
 });
 
 export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
+    // Helper to push history for major structural changes
+    const pushHistory = (newState: CodeState): CodeState => {
+        // Do not store the events/history deep clone if memory is an issue, but for a short webapp it's fine.
+        // We only save history before states that move the node or change critical logic.
+        return {
+            ...newState,
+            history: [...state.history, state]
+        };
+    };
+
     switch (action.type) {
         case 'START_CODE':
             return {
@@ -88,7 +108,8 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 events: [
                     ...state.events,
                     createLog(`CPR Started (30:2)`)
-                ]
+                ],
+                history: []
             };
 
         case 'SET_CHECKLIST':
@@ -96,7 +117,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
 
         case 'DELIVER_SHOCK':
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([200]);
-            return {
+            return pushHistory({
                 ...state,
                 currentNodeId: action.payload.nextNodeId,
                 cprTimerSecondsRemaining: 120,
@@ -104,12 +125,12 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                     ...state.events,
                     createLog(`Shock Delivered`, action.payload.energy || `200 J`)
                 ]
-            };
+            });
 
         case 'GIVE_EPI':
             if (state.epiCooldownSecondsRemaining > 0) return state;
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([200]);
-            return {
+            return pushHistory({
                 ...state,
                 epiDoses: state.epiDoses + 1,
                 epiCooldownSecondsRemaining: 240, // 4-minute autotrigger
@@ -117,21 +138,21 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                     ...state.events,
                     createLog(`Epinephrine Administered`, `1 mg IV/IO`)
                 ]
-            };
+            });
 
         case 'GIVE_AMIO':
             if (state.amioDoses >= 2) return state;
             if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([200]);
             const nextDose = state.amioDoses === 0 ? 1 : 2;
             const amount = state.amioDoses === 0 ? '300 mg' : '150 mg';
-            return {
+            return pushHistory({
                 ...state,
                 amioDoses: nextDose,
                 events: [
                     ...state.events,
                     createLog(`Amiodarone Administered`, `${amount} IV/IO`)
                 ]
-            };
+            });
 
         case 'TOGGLE_METRONOME':
             return {
@@ -162,17 +183,17 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
             };
 
         case 'COMPLETED_CPR_CYCLE':
-            return {
+            return pushHistory({
                 ...state,
                 cprCycleCount: state.cprCycleCount + 1,
                 events: [
                     ...state.events,
                     createLog(`CPR Cycle Completed`, `Cycle #${state.cprCycleCount + 1}`)
                 ]
-            };
+            });
 
         case 'CHANGE_RHYTHM':
-            return {
+            return pushHistory({
                 ...state,
                 rhythmType: action.payload.rhythmType,
                 currentNodeId: action.payload.nextNodeId || state.currentNodeId,
@@ -180,10 +201,10 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                     ...state.events,
                     createLog(`Rhythm manually updated`, action.payload.rhythmType.toUpperCase())
                 ]
-            };
+            });
 
         case 'ACHIEVE_ROSC':
-            return {
+            return pushHistory({
                 ...state,
                 rosCachieved: true,
                 codeEnded: true,
@@ -193,7 +214,7 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                     ...state.events,
                     createLog('ROSC Achieved', 'Starting post-cardiac arrest care')
                 ]
-            };
+            });
 
         case 'TERMINATE_CODE':
             return {
@@ -210,9 +231,36 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
         case 'JUMP_NODE':
             // We consciously DO NOT emit a medical record line for touching the flowchart 
             // to keep the log strictly focused on physical medical actions (shocks, meds, cpr resets, rhythms)
-            return {
+            return pushHistory({
                 ...state,
                 currentNodeId: action.payload.nodeId
+            });
+
+        case 'SET_VIEW_MODE':
+            return { ...state, viewMode: action.payload.mode };
+
+        case 'CLEAR_AIRWAY_GATEKEEPER':
+            return {
+                ...state,
+                airwayGatekeeperCleared: true,
+                events: [
+                    ...state.events,
+                    createLog('Airway Gatekeeper Cleared', 'Intubation checklist confirmed')
+                ]
+            };
+
+        case 'UNDO_LAST_ACTION':
+            if (state.history.length === 0) return state;
+            const previousState = state.history[state.history.length - 1];
+            // We pop the history, but we probably want to keep the current events array so we don't erase logs when undoing?
+            // Actually, if we undo a shock, it shouldn't be in the clinical record (it was a misclick). 
+            // So fully restoring the state is exactly what we want.
+            // But we might need to preserve viewMode and timers if they ticked... 
+            // For simplicity, restore the full previous structural state, but keep the current viewMode.
+            return {
+                ...previousState,
+                viewMode: state.viewMode,
+                history: state.history.slice(0, -1)
             };
 
         case 'ADD_LOG':

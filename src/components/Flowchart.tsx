@@ -161,12 +161,12 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                         let typeStyles = 'bg-blue-100 border-blue-400 text-blue-900';
                         if (node.type === 'action') typeStyles = 'bg-blue-100 border-blue-400 text-blue-900 shadow-md';
                         if (node.type === 'decision') typeStyles = 'bg-[#D97777] border-[#A83232] text-white shadow-md hero-hexagon'; // Replicating AHA Red Hexagon
-                        if (node.boxNumber === '1') typeStyles = 'bg-gray-100 border-gray-400 text-gray-900 shadow-md';
+                        if (node.id === 'BOX_1_START_CPR') typeStyles = 'bg-gray-100 border-gray-400 text-gray-900 shadow-md';
                         if (node.type === 'terminal') typeStyles = 'bg-gray-100 border-gray-400 text-gray-900 rounded-3xl shadow-md';
 
                         const activeStyles = isActive
-                            ? 'ring-4 ring-neon-green ring-offset-4 ring-offset-gray-950 scale-105 opacity-100 z-20'
-                            : 'opacity-20 hover:opacity-100 transition-opacity duration-300 z-10';
+                            ? 'ring-4 ring-neon-green ring-offset-4 ring-offset-gray-950 scale-105 opacity-100 z-20 shadow-[0_0_30px_rgba(57,255,20,0.8)]'
+                            : 'opacity-15 hover:opacity-100 transition-opacity duration-300 z-10 grayscale-[50%]';
 
                         const isShockNode = node.id.includes('SHOCK') && !node.id.includes('NONSHOCK');
                         const showShockBtn = isActive && isShockNode;
@@ -176,7 +176,7 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                                 key={node.id}
                                 ref={isActive ? activeNodeRef : null}
                                 onClick={() => onNodeTap(node.id)}
-                                className={`absolute flex -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[320px] cursor-pointer transition-transform duration-300 ${activeStyles}`}
+                                className={`absolute flex -translate-x-1/2 -translate-y-1/2 w-[240px] md:w-[280px] cursor-pointer transition-transform duration-300 ${activeStyles}`}
                                 style={{
                                     left: `${layout.x}%`,
                                     top: `${layout.y}%`,
@@ -184,15 +184,8 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                                 title={node.description}
                             >
                                 {/* Node Box */}
-                                <div className={`w-full h-full flex flex-col p-4 rounded-[10px] border-[3px] ${typeStyles}`}
+                                <div className={`w-full h-full flex flex-col p-2 md:p-3 rounded-[10px] border-[3px] ${typeStyles}`}
                                     style={node.type === 'decision' ? { clipPath: 'polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%)', borderRadius: 0 } : {}}>
-
-                                    {/* Circle Number */}
-                                    {node.boxNumber && (
-                                        <div className="absolute -left-3 -top-3 w-8 md:w-10 h-8 md:h-10 rounded-full bg-white border-2 border-gray-400 text-gray-800 font-bold flex items-center justify-center shadow-sm text-sm md:text-base z-30">
-                                            {node.boxNumber}
-                                        </div>
-                                    )}
 
                                     <div className={`text-center font-bold text-lg md:text-xl leading-tight ${node.type === 'decision' ? 'mb-0' : 'mb-2'}`}>
                                         {node.title}

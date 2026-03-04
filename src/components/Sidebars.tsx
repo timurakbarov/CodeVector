@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CodeState, CodeAction } from '../state/codeState';
-import { Syringe, CheckSquare, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Syringe, CheckSquare, AlertCircle, ChevronUp, ChevronDown, Map as MapIcon, LayoutList } from 'lucide-react';
 
 interface SidebarProps {
     state: CodeState;
@@ -99,55 +99,67 @@ export const HsAndTsSidebar: React.FC<SidebarProps> = ({ state }) => {
 
 export const DrugsSidebar: React.FC<SidebarProps> = ({ state, dispatch }) => {
     return (
-        <div className="w-full flex flex-col gap-3 p-4 border-b border-gray-800 bg-gray-950 shrink-0">
-            <div className="text-xs uppercase tracking-widest text-gray-500 font-bold mb-1">Medications</div>
-            <button
-                className={`relative min-h-[80px] md:min-h-[64px] p-4 rounded-xl border flex items-center gap-4 transition-all ${state.epiCooldownSecondsRemaining === 0 && !state.codeEnded
-                    ? 'border-blue-500 bg-blue-950/40 text-blue-300 hover:bg-blue-900 hover:text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                    : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
-                    }`}
-                onClick={() => dispatch({ type: 'GIVE_EPI' })}
-                disabled={state.epiCooldownSecondsRemaining > 0 || state.codeEnded}
-            >
-                <div className="bg-black/20 p-2 rounded-lg shrink-0">
-                    <Syringe className="w-6 h-6" />
-                </div>
-                <div className="flex flex-col items-start flex-1">
-                    <span className="font-bold text-lg leading-none">Epinephrine</span>
-                    <span className="text-xs font-normal mt-1 opacity-80">1 mg IV/IO</span>
-                </div>
+        <div className="w-full flex flex-col gap-2 p-2 px-3 border-b border-gray-800 bg-gray-950 shrink-0 shadow-md z-20">
+            <div className="flex justify-between items-center px-1">
+                <span className="text-[10px] md:text-xs uppercase tracking-widest text-gray-500 font-bold">Medications & View Options</span>
+            </div>
 
-                {state.epiCooldownSecondsRemaining > 0 && (
-                    <div className="absolute inset-0 flex items-center justify-between px-6 bg-gray-900/95 rounded-xl border border-gray-700 text-gray-400 overflow-hidden">
-                        <span className="text-xs uppercase tracking-widest font-bold">Cooldown</span>
-                        <span className="text-2xl font-mono font-bold text-blue-400">{formatTime(state.epiCooldownSecondsRemaining)}</span>
-
-                        {/* Progress Bar background */}
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-900 w-full opacity-30">
-                            <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${(state.epiCooldownSecondsRemaining / 240) * 100}%` }} />
-                        </div>
+            <div className="flex flex-row md:flex-col gap-2 w-full">
+                {/* Epinephrine */}
+                <button
+                    className={`flex-1 relative min-h-[50px] md:min-h-[64px] p-2 px-2 md:p-4 rounded-lg md:rounded-xl border flex justify-center md:justify-start items-center gap-2 transition-all ${state.epiCooldownSecondsRemaining === 0 && !state.codeEnded
+                        ? 'border-blue-500 bg-blue-950/40 text-blue-300 hover:bg-blue-900 hover:text-white shadow-[0_0_10px_rgba(59,130,246,0.2)]'
+                        : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
+                        }`}
+                    onClick={() => dispatch({ type: 'GIVE_EPI' })}
+                    disabled={state.epiCooldownSecondsRemaining > 0 || state.codeEnded}
+                >
+                    <Syringe className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
+                    <div className="flex flex-col items-start leading-tight">
+                        <span className="font-bold text-sm md:text-lg">Epi 1mg</span>
+                        <span className="text-[10px] md:text-xs font-normal opacity-80 hidden md:block">1 mg IV/IO</span>
                     </div>
-                )}
-            </button>
 
-            <button
-                className={`min-h-[80px] md:min-h-[64px] p-4 rounded-xl border flex items-center gap-4 transition-all ${state.amioDoses < 2 && !state.codeEnded
-                    ? 'border-purple-500 bg-purple-950/40 text-purple-300 hover:bg-purple-900 hover:text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                    : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
-                    }`}
-                onClick={() => dispatch({ type: 'GIVE_AMIO' })}
-                disabled={state.amioDoses >= 2 || state.codeEnded}
-            >
-                <div className="bg-black/20 p-2 rounded-lg shrink-0">
-                    <Syringe className="w-6 h-6" />
-                </div>
-                <div className="flex flex-col items-start flex-1">
-                    <span className="font-bold text-lg leading-none">Amiodarone</span>
-                    <span className="text-xs font-normal mt-1 opacity-80">
-                        {state.amioDoses === 0 ? '300 mg bolus' : state.amioDoses === 1 ? '150 mg bolus' : 'Max doses reached'}
-                    </span>
-                </div>
-            </button>
+                    {state.epiCooldownSecondsRemaining > 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 rounded-lg md:rounded-xl border border-gray-700 text-gray-400 overflow-hidden">
+                            <span className="text-xl md:text-2xl font-mono font-bold text-blue-400">{formatTime(state.epiCooldownSecondsRemaining)}</span>
+                            <div className="absolute bottom-0 left-0 h-1 bg-blue-900 w-full opacity-30">
+                                <div className="h-full bg-blue-500" style={{ width: `${(state.epiCooldownSecondsRemaining / 240) * 100}%` }} />
+                            </div>
+                        </div>
+                    )}
+                </button>
+
+                {/* Amiodarone */}
+                <button
+                    className={`flex-1 min-h-[50px] md:min-h-[64px] p-2 px-2 md:p-4 rounded-lg md:rounded-xl border flex justify-center md:justify-start items-center gap-2 transition-all ${state.amioDoses < 2 && !state.codeEnded
+                        ? 'border-purple-500 bg-purple-950/40 text-purple-300 hover:bg-purple-900 hover:text-white shadow-[0_0_10px_rgba(168,85,247,0.2)]'
+                        : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
+                        }`}
+                    onClick={() => dispatch({ type: 'GIVE_AMIO' })}
+                    disabled={state.amioDoses >= 2 || state.codeEnded}
+                >
+                    <Syringe className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
+                    <div className="flex flex-col items-start leading-tight">
+                        <span className="font-bold text-sm md:text-lg">Amio</span>
+                        <span className="text-[10px] md:text-xs font-normal opacity-80 hidden md:block">
+                            {state.amioDoses === 0 ? '300 mg bolus' : state.amioDoses === 1 ? '150 mg bolus' : 'Max doses reached'}
+                        </span>
+                    </div>
+                </button>
+
+                {/* View Toggle Button for Mobile Only */}
+                <button
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', payload: { mode: state.viewMode === 'map' ? 'wizard' : 'map' } })}
+                    className="md:hidden flex-1 min-h-[50px] p-2 rounded-lg border flex items-center justify-center gap-2 transition-all bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                >
+                    {state.viewMode === 'map' ? <LayoutList className="w-4 h-4 text-neon-green" style={{ color: 'var(--color-neon-green)' }} /> : <MapIcon className="w-4 h-4 text-blue-400" />}
+                    <div className="flex flex-col items-start leading-tight">
+                        <span className="text-[10px] uppercase opacity-70">View</span>
+                        <span className="font-bold text-sm uppercase">{state.viewMode === 'map' ? 'Wizard' : 'Map'}</span>
+                    </div>
+                </button>
+            </div>
         </div>
     );
 };

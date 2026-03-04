@@ -19,7 +19,6 @@ export interface AlgorithmEdge {
 export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     BOX_1_START_CPR: {
         id: 'BOX_1_START_CPR',
-        boxNumber: '1',
         title: 'Start CPR',
         description: 'Begin bag-mask ventilation and give oxygen. Attach monitor/defibrillator.',
         type: 'action',
@@ -27,7 +26,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_2_VF_PVT: {
         id: 'BOX_2_VF_PVT',
-        boxNumber: '2',
         title: 'VF/pVT',
         description: 'Rhythm shockable? Yes.',
         type: 'decision',
@@ -35,7 +33,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_3_SHOCK: {
         id: 'BOX_3_SHOCK',
-        boxNumber: '3',
         title: 'Shock',
         description: 'Deliver Shock.',
         type: 'action',
@@ -43,7 +40,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_4_CPR_2_MIN: {
         id: 'BOX_4_CPR_2_MIN',
-        boxNumber: '4',
         title: 'CPR 2 min',
         description: 'IV/IO access',
         type: 'action',
@@ -51,7 +47,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_5_SHOCK: {
         id: 'BOX_5_SHOCK',
-        boxNumber: '5',
         title: 'Shock',
         description: 'Deliver Shock.',
         type: 'action',
@@ -59,7 +54,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_6_CPR_EPI: {
         id: 'BOX_6_CPR_EPI',
-        boxNumber: '6',
         title: 'CPR 2 min',
         description: 'Epinephrine every 3-5 min. Consider advanced airway, capnography.',
         type: 'action',
@@ -67,7 +61,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_7_SHOCK: {
         id: 'BOX_7_SHOCK',
-        boxNumber: '7',
         title: 'Shock',
         description: 'Deliver Shock.',
         type: 'action',
@@ -75,7 +68,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_8_CPR_AMIO: {
         id: 'BOX_8_CPR_AMIO',
-        boxNumber: '8',
         title: 'CPR 2 min',
         description: 'Amiodarone or lidocaine. Treat reversible causes.',
         type: 'action',
@@ -83,7 +75,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_9_ASYSTOLE_PEA: {
         id: 'BOX_9_ASYSTOLE_PEA',
-        boxNumber: '9',
         title: 'Asystole/PEA',
         description: 'Rhythm shockable? No.',
         type: 'decision',
@@ -98,7 +89,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_11_CPR_2_MIN_NONSHOCK: {
         id: 'BOX_11_CPR_2_MIN_NONSHOCK',
-        boxNumber: '10', // Following visual, box 10 is CPR 2 min. So wait, let me map carefully.
         title: 'CPR 2 min',
         description: 'IV/IO access. Epinephrine every 3-5 min. Consider advanced airway.',
         type: 'action',
@@ -106,7 +96,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_12_ROSC_OR_TERMINATE: {
         id: 'BOX_12_ROSC_OR_TERMINATE',
-        boxNumber: '12',
         title: 'ROSC or Terminate',
         description: 'If no signs of ROSC, go to 10. If ROSC, go to post-cardiac arrest care.',
         type: 'terminal',
@@ -114,7 +103,6 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     },
     BOX_11_TREAT_CAUSES: {
         id: 'BOX_11_TREAT_CAUSES',
-        boxNumber: '11',
         title: 'CPR 2 min',
         description: 'Treat reversible causes.',
         type: 'action',
