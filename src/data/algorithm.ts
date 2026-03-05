@@ -69,7 +69,7 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     BOX_8_CPR_AMIO: {
         id: 'BOX_8_CPR_AMIO',
         title: 'CPR 2 min',
-        description: 'Amiodarone or lidocaine. Treat reversible causes. Evaluate rhythm every 2 minutes and return to step 5 (Shock) if still shockable, or shift to Asystole/PEA if non-shockable.',
+        description: 'Amiodarone or lidocaine. Treat reversible causes. Evaluate rhythm every 2 minutes and step back to Shock if still shockable, or shift to Asystole/PEA if non-shockable.',
         type: 'action',
         branch: 'shockable'
     },
@@ -104,7 +104,7 @@ export const AHA_ALGORITHM_NODES: Record<string, AlgorithmNode> = {
     BOX_11_TREAT_CAUSES: {
         id: 'BOX_11_TREAT_CAUSES',
         title: 'CPR 2 min',
-        description: 'Treat reversible causes. Evaluate rhythm every 2 minutes and shift to shockable pathway if converted, or return to step 10 (Epi) if still non-shockable.',
+        description: 'Treat reversible causes. Evaluate rhythm every 2 minutes and shift to shockable pathway if converted, or continue CPR with Epi every 3-5 minutes if still non-shockable.',
         type: 'action',
         branch: 'nonShockable'
     }
