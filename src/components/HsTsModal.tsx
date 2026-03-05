@@ -17,7 +17,7 @@ export const HsTsModal = ({ onClear }: { onClear: () => void }) => {
                 </div>
 
                 <div className="flex flex-col gap-4 text-sm md:text-base text-gray-300">
-                    <p className="text-indigo-300 font-bold mb-2">Identify and treat underlying reversible causes immediately:</p>
+                    <p className="text-indigo-300 font-bold mb-2">Identify and treat underlying reversible causes when applicable:</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-gray-950 p-4 border border-gray-800 rounded-xl">
