@@ -81,7 +81,8 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                                 const next = map[id] || 'BOX_4_CPR_2_MIN';
                                 dispatch({ type: 'DELIVER_SHOCK', payload: { nextNodeId: next, energy: '200 J' } })
                             },
-                            color: 'border-red-500 text-red-400 hover:bg-red-950/40'
+                            color: 'border-red-500 text-red-400 hover:bg-red-950/40 hover:border-red-400',
+                            isShockBtn: true
                         }
                     ]
                 };
@@ -218,6 +219,7 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                         const isChosen = selectedIdx === idx;
                         const isShockToggle = (opt as any).isShockable;
                         const isNonShockToggle = (opt as any).isNonShockable;
+                        const isShockBtn = (opt as any).isShockBtn;
 
                         let bgClass = 'bg-gray-950 border-gray-700';
                         let textClass = opt.color ? opt.color : 'text-gray-100 hover:border-indigo-500 hover:bg-gray-900';
@@ -228,6 +230,10 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                             iconNode = <Zap className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-cyan-300' : 'text-cyan-600/60 transition-colors'}`} />;
                         } else if (isNonShockToggle) {
                             iconNode = <ZapOff className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-green-300' : 'text-green-600/60 transition-colors'}`} />;
+                        } else if (isShockBtn) {
+                            iconNode = <Zap className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-red-300' : 'text-red-500 transition-colors'}`} />;
+                            iconClass = 'border-red-500 text-red-400 group-hover:border-red-400 group-hover:text-red-300';
+                            textClass = 'text-red-400 group-hover:text-red-300';
                         }
 
                         if (isChosen && isShockToggle) {
@@ -236,6 +242,9 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                         } else if (isChosen && isNonShockToggle) {
                             bgClass = 'bg-green-950/40 border-green-400 shadow-[0_0_30px_rgba(74,222,128,0.6)]';
                             iconClass = 'border-green-400 text-green-300 drop-shadow-[0_0_10px_rgba(74,222,128,1)]';
+                        } else if (isChosen && isShockBtn) {
+                            bgClass = 'bg-red-950/40 border-red-400 shadow-[0_0_30px_rgba(239,68,68,0.6)]';
+                            iconClass = 'border-red-400 text-red-300 drop-shadow-[0_0_10px_rgba(239,68,68,1)]';
                         } else if (isChosen) {
                             bgClass = 'bg-indigo-950/40 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.6)]';
                             iconClass = 'border-indigo-400 text-indigo-300 drop-shadow-[0_0_10px_rgba(99,102,241,1)]';

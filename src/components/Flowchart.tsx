@@ -46,7 +46,7 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
 
     useEffect(() => {
         if (activeNodeRef.current) {
-            activeNodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            activeNodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         }
     }, [currentNodeId]);
 
@@ -59,8 +59,8 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
 
     return (
         <div className="relative w-full h-full max-w-6xl mx-auto rounded-xl overflow-hidden bg-gray-950 border border-gray-800 shadow-inner">
-            <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar pb-32">
-                <div className="relative w-full min-h-[1400px] mt-8">
+            <div className="absolute inset-0 overflow-y-auto overflow-x-auto custom-scrollbar pb-32">
+                <div className="relative w-full min-w-[600px] lg:min-w-full min-h-[1400px] mt-8">
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
                         <defs>
                             <marker id="arrow-gray" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4B5563" /></marker>
