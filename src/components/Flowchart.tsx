@@ -153,6 +153,8 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
 
                     {/* HTML Nodes */}
                     {Object.values(AHA_ALGORITHM_NODES).map(node => {
+                        if (node.id === 'BOX_12_ROSC_OR_TERMINATE') return null; // Remove BOX_12_ROSC_OR_TERMINATE rendering from Map View
+
                         const layout = LAYOUT[node.id];
                         if (!layout) return null;
 

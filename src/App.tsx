@@ -57,7 +57,10 @@ const App: React.FC = () => {
   const touchStartRef = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = e.touches[0].clientX;
+    // Only capture gesture if we are swiping from the very edge, or on a specific target, to prevent map panning from triggering tab switch
+    if (e.touches[0].clientX < 40 || e.touches[0].clientX > window.innerWidth - 40) {
+      touchStartRef.current = e.touches[0].clientX;
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -197,14 +200,12 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Panel: Desktop Sidebars / Mobile Event Log */}
           <div className={`w-full md:w-[380px] h-full shrink-0 flex flex-col bg-gray-900 border-l border-gray-800 overflow-hidden ${activeTab === 'flowchart' ? 'hidden md:flex' : 'flex'}`}>
-            {/* Hide DrugsSidebar in the tab view for mobile since it's above flowchart now */}
             <div className="hidden md:block">
               <DrugsSidebar state={state} dispatch={dispatch} />
             </div>
             <div className="flex-1 overflow-y-auto">
-              <EventLog events={state.events} codeStartTime={state.codeStartTime} />
+              <EventLog events={state.events} codeStartTime={state.codeStartTime} dispatch={dispatch} />
             </div>
           </div>
         </div>
@@ -225,27 +226,27 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {/* FOOTER: Controls */}
-        <div className="h-[10vh] max-h-[80px] border-t border-gray-800 bg-black flex items-center justify-center gap-4 md:gap-8 shrink-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+        {/* FOOTER: Fixed Action Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-[10vh] max-h-[80px] border-t border-gray-800 bg-black flex items-center justify-center gap-2 md:gap-8 shrink-0 shadow-[0_-4px_10px_rgba(0,0,0,0.5)] z-50 px-2">
           <button onClick={() => dispatch({ type: 'TOGGLE_METRONOME' })} disabled={state.codeEnded}
-            className={`flex items-center justify-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full font-semibold border-2 transition-all ${state.metronomeEnabled ? 'bg-neon-green/20 border-neon-green text-neon-green shadow-[0_0_10px_rgba(57,255,20,0.5)] scale-105' : 'bg-gray-900 border-gray-800 text-gray-400'} text-xs md:text-base`}
+            className={`flex items-center justify-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full font-bold border-2 transition-all ${state.metronomeEnabled ? 'bg-neon-green/20 border-neon-green text-neon-green shadow-[0_0_10px_rgba(57,255,20,0.5)] scale-105' : 'bg-gray-900 border-gray-800 text-gray-400'} text-xs md:text-base whitespace-nowrap`}
             style={state.metronomeEnabled ? { color: 'var(--color-neon-green)', borderColor: 'var(--color-neon-green)' } : undefined}>
-            <Activity className="w-4 h-4 md:w-5 md:h-5" /> Metronome {state.metronomeEnabled ? 'ON' : 'OFF'}
+            <Activity className="w-4 h-4 md:w-5 md:h-5" /> <span className="hidden md:inline">Metronome </span>{state.metronomeEnabled ? 'ON' : 'OFF'}
           </button>
 
           {state.viewMode === 'wizard' && state.history.length > 0 && (
-            <button onClick={() => dispatch({ type: 'UNDO_LAST_ACTION' })} disabled={state.codeEnded} className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gray-900 border-2 border-gray-600 hover:border-gray-400 text-gray-300 rounded-full text-xs font-bold transition-all uppercase">
+            <button onClick={() => dispatch({ type: 'UNDO_LAST_ACTION' })} disabled={state.codeEnded} className="flex flex-col items-center justify-center md:flex-row md:gap-2 px-3 md:px-6 py-2 bg-gray-900 border-2 border-gray-600 hover:border-gray-400 text-gray-300 rounded-full text-[10px] md:text-sm font-bold transition-all uppercase whitespace-nowrap">
               <RotateCcw className="w-4 h-4 md:w-5 md:h-5" /> Undo
             </button>
           )}
 
-          <div className="hidden md:block w-px h-10 bg-gray-800" />
+          <div className="w-px h-8 bg-gray-800" />
 
-          <button onClick={() => dispatch({ type: 'ACHIEVE_ROSC' })} disabled={state.codeEnded} className="px-6 md:px-8 min-h-[50px] rounded-full font-semibold border-2 border-green-500 bg-green-950/40 text-green-400 hover:bg-green-900 transition-all text-sm md:text-lg">
+          <button onClick={() => dispatch({ type: 'ACHIEVE_ROSC' })} disabled={state.codeEnded} className="flex-1 max-w-[120px] md:max-w-none px-4 md:px-8 py-2 md:py-3 rounded-full font-bold border-2 border-green-500 bg-green-950/40 text-green-400 hover:bg-green-900 transition-all text-xs md:text-lg text-center whitespace-nowrap">
             ROSC
           </button>
 
-          <button onClick={() => dispatch({ type: 'TERMINATE_CODE' })} disabled={state.codeEnded} className="px-6 md:px-8 min-h-[50px] rounded-full font-semibold border-2 border-red-500 bg-red-950/40 text-red-500 hover:bg-red-900 transition-all text-sm md:text-lg tracking-wider">
+          <button onClick={() => dispatch({ type: 'TERMINATE_CODE' })} disabled={state.codeEnded} className="flex-1 max-w-[120px] md:max-w-none px-4 md:px-8 py-2 md:py-3 rounded-full font-bold border-2 border-red-500 bg-red-950/40 text-red-500 hover:bg-red-900 transition-all text-xs md:text-lg tracking-wider text-center whitespace-nowrap">
             END CODE
           </button>
         </div>

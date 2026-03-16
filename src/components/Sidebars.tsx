@@ -35,7 +35,7 @@ export const DrugsSidebar: React.FC<SidebarProps> = ({ state, dispatch }) => {
                 >
                     <Syringe className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
                     <div className="flex flex-col items-center md:items-start leading-tight">
-                        <span className="font-bold text-[11px] md:text-lg">Epi 1mg</span>
+                        <span className="font-bold text-[11px] md:text-lg flex items-center gap-1">Epi 1mg {state.epiDoses > 0 && <span className="bg-blue-600 text-white text-[9px] md:text-[10px] px-1.5 py-0.5 rounded-full ml-1">Dose {state.epiDoses}</span>}</span>
                         <span className="text-[10px] md:text-xs font-normal opacity-80 hidden md:block">1 mg IV/IO</span>
                     </div>
 
@@ -53,14 +53,14 @@ export const DrugsSidebar: React.FC<SidebarProps> = ({ state, dispatch }) => {
                 <button
                     className={`min-h-[50px] md:min-h-[64px] p-2 md:p-4 rounded-lg md:rounded-xl border flex flex-col md:flex-row justify-center md:justify-start items-center gap-1 md:gap-3 transition-all ${state.amioDoses < 2 && !state.codeEnded
                         ? 'border-purple-500 bg-purple-950/40 text-purple-300 hover:bg-purple-900 hover:text-white shadow-[0_0_10px_rgba(168,85,247,0.2)]'
-                        : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
+                        : 'border-gray-800 bg-gray-950 text-gray-700 cursor-not-allowed opacity-50'
                         }`}
                     onClick={() => dispatch({ type: 'GIVE_AMIO' })}
                     disabled={state.amioDoses >= 2 || state.codeEnded}
                 >
                     <Syringe className="w-4 h-4 md:w-6 md:h-6 shrink-0" />
                     <div className="flex flex-col items-center md:items-start leading-tight">
-                        <span className="font-bold text-[11px] md:text-lg">Amio</span>
+                        <span className="font-bold text-[11px] md:text-lg flex items-center gap-1">Amio {state.amioDoses > 0 && <span className="bg-purple-800 text-white text-[9px] md:text-[10px] px-1.5 py-0.5 rounded-full ml-1">Dose {state.amioDoses}</span>}</span>
                         <span className="text-[10px] md:text-xs font-normal opacity-80 hidden md:block">
                             {state.amioDoses === 0 ? '300 mg bolus' : state.amioDoses === 1 ? '150 mg bolus' : 'Max doses reached'}
                         </span>

@@ -43,16 +43,22 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             color: 'border-green-500 text-green-400 hover:bg-green-950/40'
         };
 
+        const postIntubationBullets = [
+            'Continue continuous chest compressions',
+            'Ventilate at 1 breath every 6 seconds',
+            'Continue waveform capnography'
+        ];
+
         switch (id) {
             case 'BOX_1_START_CPR':
                 return {
                     title: 'CARDIAC ARREST CONFIRMED',
                     bullets: [
-                        'Call resuscitation team / call code blue',
+                        'Call Code Blue',
                         'Begin CPR immediately (30:2)',
-                        'Give Oxygen & Attach monitor/defibrillator'
+                        'Give Oxygen + attach monitor/defibrillator'
                     ],
-                    question: 'Defibrillator attached \u2014 what does the rhythm show?',
+                    question: 'SELECT RHYTHM',
                     options: [checkShockable, checkNonShockable]
                 };
 
@@ -63,14 +69,14 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                 return {
                     title: 'SHOCKABLE RHYTHM \u2014 VF / pVT',
                     bullets: [
-                        'Shock: Biphasic 150-200 J / Monophasic 360 J',
-                        'Resume CPR immediately \u2014 do NOT check pulse first',
-                        id === 'BOX_7_SHOCK' ? 'After 3rd shock: Adrenaline 1mg IV + Amiodarone 300mg IV.' : 'Ensure high-quality compressions continue.'
+                        'Shock 150-200 J biphasic',
+                        'Resume CPR immediately',
+                        'Do NOT check pulse first',
+                        'Maintain high-quality compressions'
                     ],
-                    question: 'Deliver shock now.',
                     options: [
                         {
-                            label: 'Shock Delivered (Resume CPR 2 Min)',
+                            label: 'SHOCK DELIVERED',
                             action: () => {
                                 const map: Record<string, string> = {
                                     'BOX_2_VF_PVT': 'BOX_4_CPR_2_MIN',
@@ -91,16 +97,18 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             case 'BOX_6_CPR_EPI':
             case 'BOX_8_CPR_AMIO':
                 return {
-                    title: 'CPR \u2014 SHOCKABLE PATHWAY',
-                    bullets: [
-                        id === 'BOX_6_CPR_EPI' ? 'Adrenaline 1mg IV/IO' : (id === 'BOX_8_CPR_AMIO' ? 'Amiodarone 300mg IV/IO' : 'Obtain IV/IO access'),
-                        'Minimise interruptions in compressions',
-                        'Consider advanced airway & capnography'
-                    ],
-                    question: 'After this 2-min CPR cycle \u2014 check rhythm:',
+                    title: state.airwayGatekeeperCleared ? 'ADVANCED AIRWAY IN PLACE' : 'CPR \u2014 SHOCKABLE PATHWAY',
+                    bullets: state.airwayGatekeeperCleared
+                        ? postIntubationBullets
+                        : [
+                            id === 'BOX_6_CPR_EPI' ? 'Adrenaline 1mg IV/IO' : (id === 'BOX_8_CPR_AMIO' ? 'Amiodarone 300mg IV/IO' : 'Obtain IV/IO access'),
+                            'Minimise interruptions in compressions',
+                            'Consider advanced airway & capnography'
+                        ],
+                    question: 'After 2-min cycle \u2014 check rhythm:',
                     options: [
                         {
-                            label: 'Still shockable \u2014 VF/pVT persists',
+                            label: 'Still shockable (VF/pVT)',
                             action: () => {
                                 const map: Record<string, string> = { 'BOX_4_CPR_2_MIN': 'BOX_5_SHOCK', 'BOX_6_CPR_EPI': 'BOX_7_SHOCK', 'BOX_8_CPR_AMIO': 'BOX_5_SHOCK' };
                                 dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'shockable', nextNodeId: map[id] || 'BOX_5_SHOCK' } });
@@ -114,13 +122,12 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             case 'BOX_9_ASYSTOLE_PEA':
             case 'BOX_10_EPI_ASAP':
                 return {
-                    title: 'NON-SHOCKABLE \u2014 PEA or Asystole',
+                    title: 'NON-SHOCKABLE \u2014 PEA / Asystole',
                     bullets: [
-                        'DO NOT shock \u2014 resume CPR immediately',
-                        'Adrenaline 1mg IV as soon as access obtained',
-                        '4Hs & 4Ts: Consider reversible causes'
+                        'DO NOT shock \u2014 resume CPR',
+                        'Adrenaline 1mg IV ASAP',
+                        'Consider reversible causes'
                     ],
-                    question: 'Proceed to continuous CPR monitoring:',
                     options: [
                         { label: 'Start CPR (2 Min Cycle)', action: () => dispatch({ type: 'JUMP_NODE', payload: { nodeId: 'BOX_11_CPR_2_MIN_NONSHOCK' } }) }
                     ]
@@ -129,17 +136,18 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             case 'BOX_11_CPR_2_MIN_NONSHOCK':
             case 'BOX_11_TREAT_CAUSES':
                 return {
-                    title: 'CPR \u2014 NON-SHOCKABLE PATHWAY',
-                    bullets: [
-                        'Continue high-quality CPR',
-                        'Adrenaline every 3-5 minutes',
-                        '4Hs: Hypoxia, Hypovolaemia, Hypo/Hyperkalaemia, Hypothermia',
-                        '4Ts: Tension pneumothorax, Tamponade, Toxins, Thrombosis'
-                    ],
-                    question: 'After 2 min CPR \u2014 check rhythm:',
+                    title: state.airwayGatekeeperCleared ? 'ADVANCED AIRWAY IN PLACE' : 'CPR \u2014 NON-SHOCKABLE',
+                    bullets: state.airwayGatekeeperCleared
+                        ? postIntubationBullets
+                        : [
+                            'Continue high-quality CPR',
+                            'Adrenaline every 3-5 minutes',
+                            'Treat reversible causes',
+                        ],
+                    question: 'After 2 min cycle \u2014 check rhythm:',
                     options: [
                         checkShockable,
-                        { label: 'Still non-shockable \u2014 PEA or Asystole', action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_11_CPR_2_MIN_NONSHOCK' } }), isNonShockable: true }
+                        { label: 'Still non-shockable', action: () => dispatch({ type: 'CHANGE_RHYTHM', payload: { rhythmType: 'nonShockable', nextNodeId: 'BOX_11_CPR_2_MIN_NONSHOCK' } }), isNonShockable: true }
                     ]
                 };
 
@@ -148,11 +156,10 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                     title: 'ROSC ACHIEVED',
                     bullets: [
                         'Optimise Ventilation and Oxygenation',
-                        'Treat Hypotension (MAP \u2265 65 mm Hg)',
-                        'Obtain 12-Lead ECG',
-                        'Targeted Temperature Management'
+                        'Treat Hypotension',
+                        'Obtain 12-Lead ECG'
                     ],
-                    question: 'Code Vector is logging post-cardiac arrest recovery.',
+                    question: 'Log post-cardiac arrest recovery.',
                     options: []
                 };
 
@@ -184,21 +191,21 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
     }, [state.currentNodeId]);
 
     return (
-        <div ref={containerRef} className="flex-1 flex flex-col items-center bg-black p-4 md:p-8 relative overflow-y-auto w-full h-full">
-            <div className="w-full max-w-4xl flex flex-col gap-8 md:gap-12 mt-4 md:mt-8 pb-32">
+        <div ref={containerRef} className="flex-1 flex flex-col items-center bg-black p-2 md:p-4 relative overflow-y-auto w-full h-full">
+            <div className="w-full max-w-4xl flex flex-col gap-3 md:gap-4 mt-2 pb-32">
 
                 {/* Card Container - True Black Styling */}
-                <div className="bg-gray-950 border border-gray-800 rounded-3xl overflow-hidden flex flex-col w-full shadow-2xl">
-                    <div className="w-full h-1.5 bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.9)]" />
+                <div className="bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden flex flex-col w-full shadow-lg">
+                    <div className="w-full h-1 bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.9)]" />
 
-                    <div className="p-8 md:p-12 flex flex-col gap-6">
-                        <h1 className="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-tight leading-tight">
+                    <div className="p-4 md:p-6 flex flex-col gap-2">
+                        <h1 className="text-xl md:text-3xl font-extrabold text-white uppercase tracking-tight leading-tight">
                             {config.title}
                         </h1>
 
-                        <ul className="flex flex-col gap-4 my-2">
+                        <ul className="flex flex-col gap-1.5 my-1">
                             {config.bullets.map((b, i) => (
-                                <li key={i} className="flex gap-4 text-gray-300 text-xl md:text-2xl font-medium leading-relaxed">
+                                <li key={i} className="flex gap-2 text-gray-300 text-[15px] md:text-xl font-medium leading-tight">
                                     <span className="text-gray-600 font-bold">&bull;</span>
                                     <span>{b}</span>
                                 </li>
@@ -206,7 +213,7 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                         </ul>
 
                         {config.question && (
-                            <h3 className="text-2xl md:text-3xl font-bold text-gray-100 mt-6 pt-6 border-t border-gray-800">
+                            <h3 className="text-lg md:text-xl font-bold text-gray-100 mt-2 pt-2 border-t border-gray-800">
                                 {config.question}
                             </h3>
                         )}
@@ -214,7 +221,7 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                 </div>
 
                 {/* Options Stack */}
-                <div className="flex flex-col gap-4 md:gap-6 w-full">
+                <div className="flex flex-col gap-2 w-full">
                     {config.options.map((opt, idx) => {
                         const isChosen = selectedIdx === idx;
                         const isShockToggle = (opt as any).isShockable;
@@ -227,26 +234,26 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                         let iconNode = opt.icon ? opt.icon : getLetter(idx);
 
                         if (isShockToggle) {
-                            iconNode = <Zap className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-cyan-300' : 'text-cyan-600/60 transition-colors'}`} />;
+                            iconNode = <Zap className={`w-6 h-6 md:w-8 md:h-8 ${isChosen ? 'text-cyan-300' : 'text-cyan-600/60 transition-colors'}`} />;
                         } else if (isNonShockToggle) {
-                            iconNode = <ZapOff className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-green-300' : 'text-green-600/60 transition-colors'}`} />;
+                            iconNode = <ZapOff className={`w-6 h-6 md:w-8 md:h-8 ${isChosen ? 'text-green-300' : 'text-green-600/60 transition-colors'}`} />;
                         } else if (isShockBtn) {
-                            iconNode = <Zap className={`w-8 h-8 md:w-10 md:h-10 ${isChosen ? 'text-red-300' : 'text-red-500 transition-colors'}`} />;
+                            iconNode = <Zap className={`w-6 h-6 md:w-8 md:h-8 ${isChosen ? 'text-red-300' : 'text-red-500 transition-colors'}`} />;
                             iconClass = 'border-red-500 text-red-400 group-hover:border-red-400 group-hover:text-red-300';
                             textClass = 'text-red-400 group-hover:text-red-300';
                         }
 
                         if (isChosen && isShockToggle) {
-                            bgClass = 'bg-cyan-950/40 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.6)]';
+                            bgClass = 'bg-cyan-950/40 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)]';
                             iconClass = 'border-cyan-400 text-cyan-300 drop-shadow-[0_0_10px_rgba(34,211,238,1)]';
                         } else if (isChosen && isNonShockToggle) {
-                            bgClass = 'bg-green-950/40 border-green-400 shadow-[0_0_30px_rgba(74,222,128,0.6)]';
+                            bgClass = 'bg-green-950/40 border-green-400 shadow-[0_0_20px_rgba(74,222,128,0.6)]';
                             iconClass = 'border-green-400 text-green-300 drop-shadow-[0_0_10px_rgba(74,222,128,1)]';
                         } else if (isChosen && isShockBtn) {
-                            bgClass = 'bg-red-950/40 border-red-400 shadow-[0_0_30px_rgba(239,68,68,0.6)]';
+                            bgClass = 'bg-red-950/40 border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]';
                             iconClass = 'border-red-400 text-red-300 drop-shadow-[0_0_10px_rgba(239,68,68,1)]';
                         } else if (isChosen) {
-                            bgClass = 'bg-indigo-950/40 border-indigo-500 shadow-[0_0_30px_rgba(99,102,241,0.6)]';
+                            bgClass = 'bg-indigo-950/40 border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.6)]';
                             iconClass = 'border-indigo-400 text-indigo-300 drop-shadow-[0_0_10px_rgba(99,102,241,1)]';
                         }
 
@@ -254,12 +261,12 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
                             <button
                                 key={idx}
                                 onClick={() => handleOptionClick(idx, opt)}
-                                className={`flex items-center gap-6 p-6 md:p-8 rounded-2xl border-2 transition-all duration-150 text-left shadow-lg group ${bgClass} ${textClass}`}
+                                className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 text-left shadow-md group ${bgClass} ${textClass}`}
                             >
-                                <div className={`w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-xl md:text-2xl transition-all ${iconClass}`}>
+                                <div className={`w-10 h-10 shrink-0 rounded-full border-2 flex items-center justify-center font-bold text-lg md:text-xl transition-all ${iconClass}`}>
                                     {iconNode}
                                 </div>
-                                <span className="text-2xl md:text-3xl font-semibold leading-tight">
+                                <span className="text-lg md:text-2xl font-semibold leading-tight">
                                     {opt.label}
                                 </span>
                             </button>

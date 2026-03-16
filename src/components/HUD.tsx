@@ -50,7 +50,7 @@ export const HUD: React.FC<HUDProps> = ({ state, dispatch }) => {
                     disabled={state.epiCooldownSecondsRemaining > 0 || state.codeEnded}
                 >
                     <Syringe className="w-8 h-8 mb-2" />
-                    Epinephrine
+                    <div className="flex items-center gap-2">Epinephrine {state.epiDoses > 0 && <span className="bg-blue-600 text-white text-[12px] px-2 py-0.5 rounded-full">Dose {state.epiDoses}</span>}</div>
                     <span className="text-sm font-normal mt-1 opacity-80">1 mg IV/IO</span>
 
                     {state.epiCooldownSecondsRemaining > 0 && (
@@ -64,13 +64,13 @@ export const HUD: React.FC<HUDProps> = ({ state, dispatch }) => {
                 <button
                     className={`p-6 px-8 rounded-2xl border-2 font-bold text-lg flex flex-col items-center justify-center shadow-lg transition-all ${state.amioDoses < 2 && !state.codeEnded
                         ? 'border-purple-500 bg-purple-950/40 text-purple-300 hover:bg-purple-900 hover:text-white'
-                        : 'border-gray-700 bg-gray-900 text-gray-600 cursor-not-allowed'
+                        : 'border-gray-800 bg-gray-950 text-gray-700 cursor-not-allowed opacity-50'
                         }`}
                     onClick={() => dispatch({ type: 'GIVE_AMIO' })}
                     disabled={state.amioDoses >= 2 || state.codeEnded}
                 >
                     <Syringe className="w-8 h-8 mb-2" />
-                    Amiodarone
+                    <div className="flex items-center gap-2">Amiodarone {state.amioDoses > 0 && <span className="bg-purple-800 text-white text-[12px] px-2 py-0.5 rounded-full">Dose {state.amioDoses}</span>}</div>
                     <span className="text-sm font-normal mt-1 opacity-80">
                         {state.amioDoses === 0 ? '300 mg bolus' : state.amioDoses === 1 ? '150 mg bolus' : 'Max doses reached'}
                     </span>
