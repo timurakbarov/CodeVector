@@ -40,8 +40,9 @@ export const DrugsSidebar: React.FC<SidebarProps> = ({ state, dispatch }) => {
                     </div>
 
                     {state.epiCooldownSecondsRemaining > 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 rounded-lg md:rounded-xl border border-gray-700 text-gray-400 overflow-hidden">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/95 rounded-lg md:rounded-xl border border-gray-700 text-gray-400 overflow-hidden z-10">
                             <span className="text-xl md:text-2xl font-mono font-bold text-blue-400">{formatTime(state.epiCooldownSecondsRemaining)}</span>
+                            {state.epiDoses > 0 && <span className="absolute top-1.5 right-1.5 bg-blue-600 text-white text-[9px] md:text-[10px] px-1.5 py-0.5 rounded-full shadow-md">Dose {state.epiDoses}</span>}
                             <div className="absolute bottom-0 left-0 h-1 bg-blue-900 w-full opacity-30">
                                 <div className="h-full bg-blue-500" style={{ width: `${(state.epiCooldownSecondsRemaining / 240) * 100}%` }} />
                             </div>

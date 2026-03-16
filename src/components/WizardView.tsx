@@ -97,14 +97,12 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             case 'BOX_6_CPR_EPI':
             case 'BOX_8_CPR_AMIO':
                 return {
-                    title: state.airwayGatekeeperCleared ? 'ADVANCED AIRWAY IN PLACE' : 'CPR \u2014 SHOCKABLE PATHWAY',
-                    bullets: state.airwayGatekeeperCleared
-                        ? postIntubationBullets
-                        : [
-                            id === 'BOX_6_CPR_EPI' ? 'Adrenaline 1mg IV/IO' : (id === 'BOX_8_CPR_AMIO' ? 'Amiodarone 300mg IV/IO' : 'Obtain IV/IO access'),
-                            'Minimise interruptions in compressions',
-                            'Consider advanced airway & capnography'
-                        ],
+                    title: 'CPR \u2014 SHOCKABLE PATHWAY',
+                    bullets: [
+                        id === 'BOX_6_CPR_EPI' ? 'Adrenaline 1mg IV/IO' : (id === 'BOX_8_CPR_AMIO' ? 'Amiodarone 300mg IV/IO' : 'Obtain IV/IO access'),
+                        'Minimise interruptions in compressions',
+                        state.airwayGatekeeperCleared ? 'Advanced Airway Placed: Vent 1 breath / 6s' : 'Consider advanced airway & capnography'
+                    ],
                     question: 'After 2-min cycle \u2014 check rhythm:',
                     options: [
                         {
@@ -136,14 +134,13 @@ export const WizardView: React.FC<WizardViewProps> = ({ state, dispatch }) => {
             case 'BOX_11_CPR_2_MIN_NONSHOCK':
             case 'BOX_11_TREAT_CAUSES':
                 return {
-                    title: state.airwayGatekeeperCleared ? 'ADVANCED AIRWAY IN PLACE' : 'CPR \u2014 NON-SHOCKABLE',
-                    bullets: state.airwayGatekeeperCleared
-                        ? postIntubationBullets
-                        : [
-                            'Continue high-quality CPR',
-                            'Adrenaline every 3-5 minutes',
-                            'Treat reversible causes',
-                        ],
+                    title: 'CPR \u2014 NON-SHOCKABLE',
+                    bullets: [
+                        'Continue high-quality CPR',
+                        'Adrenaline every 3-5 minutes',
+                        'Treat reversible causes',
+                        state.airwayGatekeeperCleared ? 'Advanced Airway Placed: Vent 1 breath / 6s' : 'Consider advanced airway'
+                    ],
                     question: 'After 2 min cycle \u2014 check rhythm:',
                     options: [
                         checkShockable,

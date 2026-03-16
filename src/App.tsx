@@ -53,7 +53,6 @@ class Metronome {
 const App: React.FC = () => {
   const [state, dispatch] = useReducer(codeReducer, initialState);
   const metronomeRef = useRef(new Metronome());
-  const [activeTab, setActiveTab] = useState<'flowchart' | 'log'>('flowchart');
   const touchStartRef = useRef<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -68,8 +67,7 @@ const App: React.FC = () => {
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStartRef.current - touchEnd;
 
-    if (diff > 50) setActiveTab('log'); // Swipe left
-    if (diff < -50) setActiveTab('flowchart'); // Swipe right
+    if (diff > 50 && !state.showMobileLog) dispatch({ type: 'TOGGLE_MOBILE_LOG' }); // Swipe left
 
     touchStartRef.current = null;
   };
@@ -126,8 +124,17 @@ const App: React.FC = () => {
 
           {/* Top Row on Mobile: Brand and Rhythm */}
           <div className="w-full flex items-center justify-between md:w-auto">
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-1 md:gap-4">
               <h2 className="text-xl md:text-3xl font-bold tracking-widest" style={{ color: 'var(--color-neon-green)' }}>CodeVector</h2>
+
+              {/* Mobile Log Button */}
+              <button
+                onClick={() => dispatch({ type: 'TOGGLE_MOBILE_LOG' })}
+                className="md:hidden ml-1 px-3 py-1.5 bg-gray-900 border border-gray-700 hover:bg-gray-800 rounded text-[10px] uppercase font-bold tracking-wide transition-colors"
+                style={{ color: 'var(--color-neon-green)' }}
+              >
+                Log
+              </button>
 
               {/* View Mode Toggle */}
               <div className="hidden md:flex ml-2 bg-gray-900 rounded-lg p-1 border border-gray-800">
@@ -185,7 +192,7 @@ const App: React.FC = () => {
           {/* Left Panel / Mobile Bottom Drawer Removed in V7 -> Uses HsTsModal instead */}
 
           {/* Central Flowchart Layout Wrapping */}
-          <div className={`flex-1 flex flex-col relative ${activeTab === 'log' ? 'hidden md:flex' : 'flex'}`}>
+          <div className="flex-1 flex flex-col relative w-full overflow-hidden">
             {/* V5: Mobile Permanent Drugs Bar (Top of Flowchart) */}
             <div className="md:hidden border-b border-gray-800 shrink-0">
               <DrugsSidebar state={state} dispatch={dispatch} />
@@ -200,30 +207,14 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className={`w-full md:w-[380px] h-full shrink-0 flex flex-col bg-gray-900 border-l border-gray-800 overflow-hidden ${activeTab === 'flowchart' ? 'hidden md:flex' : 'flex'}`}>
+          <div className="hidden md:flex w-[380px] h-full shrink-0 flex-col bg-gray-900 border-l border-gray-800 overflow-hidden">
             <div className="hidden md:block">
               <DrugsSidebar state={state} dispatch={dispatch} />
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto relative">
               <EventLog events={state.events} codeStartTime={state.codeStartTime} dispatch={dispatch} />
             </div>
           </div>
-        </div>
-
-        {/* Mobile Tab Indicators */}
-        <div className="md:hidden flex h-10 bg-gray-900 border-t border-gray-800 z-40">
-          <button
-            onClick={() => setActiveTab('flowchart')}
-            className={`flex-1 font-bold text-xs uppercase tracking-wider ${activeTab === 'flowchart' ? 'bg-gray-800 text-neon-green border-t-2 border-neon-green' : 'text-gray-500'}`}
-            style={activeTab === 'flowchart' ? { color: 'var(--color-neon-green)' } : undefined}>
-            Flowchart
-          </button>
-          <div className="w-px bg-gray-800" />
-          <button
-            onClick={() => setActiveTab('log')}
-            className={`flex-1 font-bold text-xs uppercase tracking-wider ${activeTab === 'log' ? 'bg-gray-800 text-blue-400 border-t-2 border-blue-500' : 'text-gray-500'}`}>
-            Medical Log
-          </button>
         </div>
 
         {/* FOOTER: Fixed Action Bar */}
@@ -264,6 +255,17 @@ const App: React.FC = () => {
       ))) && (
           <HsTsModal onClear={() => dispatch({ type: 'CLEAR_HS_TS_MODAL' })} />
         )}
+      {state.showMobileLog && (
+        <div className="md:hidden fixed inset-0 z-[60] bg-black flex flex-col pt-4 pb-2">
+          <div className="flex justify-between items-center px-4 pb-4 border-b border-gray-800 shrink-0 mt-8">
+            <h2 className="text-xl font-bold text-white tracking-widest">MEDICAL LOG</h2>
+            <button onClick={() => dispatch({ type: 'TOGGLE_MOBILE_LOG' })} className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-bold transition-colors shadow-md">CLOSE</button>
+          </div>
+          <div className="flex-1 overflow-hidden relative">
+            <EventLog events={state.events} codeStartTime={state.codeStartTime} dispatch={dispatch} />
+          </div>
+        </div>
+      )}
     </>
   );
 };

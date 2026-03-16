@@ -34,6 +34,7 @@ export interface CodeState {
     airwayGatekeeperCleared: boolean;
     showHsTsModal: boolean;
     hsTsModalCleared: boolean;
+    showMobileLog: boolean;
     history: CodeState[];
 }
 
@@ -60,6 +61,7 @@ export const initialState: CodeState = {
     airwayGatekeeperCleared: false,
     showHsTsModal: false,
     hsTsModalCleared: false,
+    showMobileLog: false,
     history: [],
 };
 
@@ -82,6 +84,7 @@ export type CodeAction =
     | { type: 'CLEAR_AIRWAY_GATEKEEPER' }
     | { type: 'TOGGLE_HS_TS_MODAL' }
     | { type: 'CLEAR_HS_TS_MODAL' }
+    | { type: 'TOGGLE_MOBILE_LOG' }
     | { type: 'UNDO_LAST_ACTION' };
 
 // Generic node jumps are no longer visibly tracked in the medical record to reduce clutter.
@@ -289,14 +292,50 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 history: state.history.slice(0, -1)
             };
 
-        case 'ADD_LOG':
+        case 'TOGGLE_MOBILE_LOG':
             return {
                 ...state,
-                events: [
-                    ...state.events,
-                    createLog(action.payload.label, action.payload.details)
-                ]
+                showMobileLog: !state.showMobileLog
             };
+
+        case 'ADD_LOG': {
+            const logDetails = action.payload.details || '';
+            let eventTime = new Date();
+            let finalLabel = action.payload.label;
+            let finalDetails = logDetails;
+
+            // Regex for HH:MM parsing (e.g. "04:19 IO access")
+            const timeMatch = logDetails.match(/^(\d{1,2}):(\d{2})\b\s*(.*)$/);
+            if (timeMatch) {
+                let hours = parseInt(timeMatch[1], 10);
+                const mins = parseInt(timeMatch[2], 10);
+
+                const currentHours = eventTime.getHours();
+                if (hours <= 12) {
+                    const amDiff = Math.abs(currentHours - hours);
+                    const pmDiff = Math.abs(currentHours - (hours + 12));
+                    if (pmDiff < amDiff && hours !== 12) {
+                        hours += 12;
+                    } else if (amDiff < pmDiff && hours === 12 && currentHours < 12) {
+                        hours = 0;
+                    }
+                }
+                eventTime.setHours(hours, mins, 0, 0);
+
+                finalLabel = "Manual Time Entry";
+                finalDetails = timeMatch[3].trim();
+            }
+
+            const newEvent = createLog(finalLabel, finalDetails);
+            newEvent.timestamp = eventTime;
+
+            const newEvents = [...state.events, newEvent].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+            return {
+                ...state,
+                events: newEvents
+            };
+        }
 
         default:
             return state;

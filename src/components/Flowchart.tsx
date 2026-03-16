@@ -76,32 +76,18 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                             const color = getEdgeColor(edge.fromNodeId, edge.toNodeId);
                             const markerRef = color === '#EF4444' ? 'url(#arrow-red)' : color === '#3B82F6' ? 'url(#arrow-blue)' : 'url(#arrow-gray)';
 
-                            // Subtracting ~2.5% from the target Y so arrows never cross box borders visually
-                            let targetY = to.y - 2.5;
-                            let points = [`${from.x}%,${from.y + 2.5}%`, `${to.x}%,${targetY}%`];
+                            // Super short stub arrows directly down from the node
+                            let targetY = from.y + 6.0;
+                            let points = [`${from.x}%,${from.y + 2.5}%`, `${from.x}%,${targetY}%`];
 
-                            // Orthogonal adjustments to perfectly avoid crossing lines and diagonals
-                            if (from.x !== to.x && from.y !== to.y) {
-                                if (edge.toNodeId === 'BOX_2_VF_PVT') {
-                                    points = [`${from.x}%,${from.y + 2.5}%`, `${to.x}%,${from.y + 2.5}%`, `${to.x}%,${targetY}%`];
-                                } else if (edge.toNodeId === 'BOX_9_ASYSTOLE_PEA' && edge.fromNodeId === 'BOX_1_START_CPR') {
-                                    points = [`${from.x}%,${from.y + 2.5}%`, `${to.x}%,${from.y + 2.5}%`, `${to.x}%,${targetY}%`];
-                                } else if (edge.toNodeId === 'BOX_12_ROSC_OR_TERMINATE') {
-                                    // Drop down directly below, then slide to center center
-                                    points = [`${from.x}%,${from.y}%`, `${from.x}%,115%`, `50%,115%`, `50%,${targetY}%`];
-                                } else if (edge.fromNodeId === 'BOX_11_CPR_2_MIN_NONSHOCK' && edge.toNodeId === 'BOX_5_SHOCK') {
-                                    // non-shockable to shockable wrap around
-                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,118%`, `5%,118%`, `5%,${targetY}%`, `${to.x}%,${targetY}%`];
-                                } else if (edge.fromNodeId === 'BOX_11_TREAT_CAUSES' && edge.toNodeId === 'BOX_5_SHOCK') {
-                                    // non-shockable to shockable wrap around
-                                    points = [`${from.x}%,${from.y}%`, `95%,${from.y}%`, `95%,118%`, `5%,118%`, `5%,${targetY}%`, `${to.x}%,${targetY}%`];
-                                } else if (edge.fromNodeId === 'BOX_11_TREAT_CAUSES' && edge.toNodeId === 'BOX_11_CPR_2_MIN_NONSHOCK') {
-                                    // loop back up non-shockable path
-                                    points = [`${from.x}%,${from.y}%`, `90%,${from.y}%`, `90%,36%`, `${to.x}%,36%`, `${to.x}%,${targetY}%`];
-                                } else if (edge.fromNodeId === 'BOX_8_CPR_AMIO' && edge.toNodeId === 'BOX_5_SHOCK') {
-                                    // Loop back up the shockable path
-                                    points = [`${from.x}%,${from.y}%`, `10%,${from.y}%`, `10%,52%`, `${to.x}%,52%`, `${to.x}%,${targetY}%`];
-                                }
+                            // Add a visual indicator if this is a cross-column connection without cluttering
+                            if (from.x !== to.x) {
+                                // Just a tiny horizontal stub
+                                const direction = to.x > from.x ? 1 : -1;
+                                points = [`${from.x}%,${from.y + 2.5}%`, `${from.x + (direction * 3)}%,${from.y + 2.5}%`];
+                            } else if (from.y > to.y) {
+                                // Loop backs (point upwards)
+                                points = [`${from.x}%,${from.y - 2.5}%`, `${from.x}%,${from.y - 6.0}%`];
                             }
 
                             const segments = generateSegments(points);
@@ -113,35 +99,21 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                                             key={sIdx}
                                             x1={seg.x1} y1={seg.y1} x2={seg.x2} y2={seg.y2}
                                             stroke={color}
-                                            strokeWidth="2"
+                                            strokeWidth="3"
                                             strokeOpacity="0.8"
                                             markerEnd={sIdx === segments.length - 1 ? markerRef : undefined}
                                         />
                                     ))}
-                                    {edge.conditionLabel && segments.length === 1 && (
-                                        <text
-                                            x={`${(from.x + to.x) / 2}%`}
-                                            y={`${(from.y + to.y) / 2}%`}
-                                            fill={color === '#EF4444' ? '#FCA5A5' : color === '#3B82F6' ? '#93C5FD' : '#9CA3AF'}
-                                            fontSize="14"
-                                            fontWeight="bold"
-                                            textAnchor="middle"
-                                            dy="-8"
-                                            className="font-sans bg-gray-950 px-2"
-                                        >
-                                            {edge.conditionLabel}
-                                        </text>
-                                    )}
-                                    {edge.conditionLabel && segments.length > 1 && (
+                                    {edge.conditionLabel && (
                                         <text
                                             x={segments[0].x2}
                                             y={segments[0].y2}
                                             fill={color === '#EF4444' ? '#FCA5A5' : color === '#3B82F6' ? '#93C5FD' : '#9CA3AF'}
-                                            fontSize="14"
-                                            fontWeight="bold"
+                                            fontSize="13"
+                                            fontWeight="600"
                                             textAnchor="middle"
-                                            dy="-8"
-                                            className="font-sans bg-gray-950 px-2"
+                                            dy={from.y > to.y ? "-12" : "18"}
+                                            className="font-sans"
                                         >
                                             {edge.conditionLabel}
                                         </text>
