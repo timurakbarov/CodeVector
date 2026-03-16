@@ -10,25 +10,26 @@ interface FlowchartProps {
 
 // Rigid, perfect grid layout matching AHA guidelines 
 const LAYOUT: Record<string, { x: number; y: number }> = {
-    BOX_1_START_CPR: { x: 50, y: 3 },
+    // Adjust Y locations aggressively so boxes sit closer together on mobile map
+    BOX_1_START_CPR: { x: 50, y: 7 },
 
     // Shockable (Left Column)
-    BOX_2_VF_PVT: { x: 20, y: 14 },
-    BOX_3_SHOCK: { x: 20, y: 24 },
-    BOX_4_CPR_2_MIN: { x: 20, y: 40 },
-    BOX_5_SHOCK: { x: 20, y: 55 },
-    BOX_6_CPR_EPI: { x: 20, y: 70 },
-    BOX_7_SHOCK: { x: 20, y: 85 },
-    BOX_8_CPR_AMIO: { x: 20, y: 100 },
+    BOX_2_VF_PVT: { x: 25, y: 22 },
+    BOX_3_SHOCK: { x: 25, y: 34 }, // Merged BOX_3_SHOCK and BOX_5_SHOCK into one Y-level
+    BOX_4_CPR_2_MIN: { x: 25, y: 46 }, // Merged BOX_4_CPR_2_MIN and BOX_6_CPR_EPI into one Y-level
+    BOX_5_SHOCK: { x: 25, y: 58 }, // Merged BOX_5_SHOCK and BOX_7_SHOCK into one Y-level
+    BOX_6_CPR_EPI: { x: 25, y: 70 }, // Merged BOX_6_CPR_EPI and BOX_8_CPR_AMIO into one Y-level
+    BOX_7_SHOCK: { x: 25, y: 82 },
+    BOX_8_CPR_AMIO: { x: 25, y: 94 },
 
     // Non-Shockable (Right Column)
-    BOX_9_ASYSTOLE_PEA: { x: 80, y: 14 },
-    BOX_10_EPI_ASAP: { x: 80, y: 24 },
-    BOX_11_CPR_2_MIN_NONSHOCK: { x: 80, y: 40 },
-    BOX_11_TREAT_CAUSES: { x: 80, y: 55 },
+    BOX_9_ASYSTOLE_PEA: { x: 75, y: 22 },
+    BOX_10_EPI_ASAP: { x: 75, y: 34 },
+    BOX_11_CPR_2_MIN_NONSHOCK: { x: 75, y: 46 },
+    BOX_11_TREAT_CAUSES: { x: 75, y: 58 },
 
     // Terminal
-    BOX_12_ROSC_OR_TERMINATE: { x: 50, y: 110 }
+    BOX_12_ROSC_OR_TERMINATE: { x: 50, y: 106 } // Adjusted Y for terminal node
 };
 
 const generateSegments = (points: string[]) => {
@@ -76,18 +77,30 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                             const color = getEdgeColor(edge.fromNodeId, edge.toNodeId);
                             const markerRef = color === '#EF4444' ? 'url(#arrow-red)' : color === '#3B82F6' ? 'url(#arrow-blue)' : 'url(#arrow-gray)';
 
-                            // Super short stub arrows directly down from the node
-                            let targetY = from.y + 6.0;
-                            let points = [`${from.x}%,${from.y + 2.5}%`, `${from.x}%,${targetY}%`];
+                            let points: string[] = [];
 
-                            // Add a visual indicator if this is a cross-column connection without cluttering
-                            if (from.x !== to.x) {
-                                // Just a tiny horizontal stub
-                                const direction = to.x > from.x ? 1 : -1;
-                                points = [`${from.x}%,${from.y + 2.5}%`, `${from.x + (direction * 3)}%,${from.y + 2.5}%`];
-                            } else if (from.y > to.y) {
-                                // Loop backs (point upwards)
-                                points = [`${from.x}%,${from.y - 2.5}%`, `${from.x}%,${from.y - 6.0}%`];
+                            // Special handler for the top split from Box 1 -> Shockable/Non-shockable
+                            // We need long, clear arrows that span the distance without tiny text
+                            if (edge.fromNodeId === 'BOX_1_START_CPR') {
+                                const targetY = to.y - 3; // Stop cleanly before next box
+                                points = [`${from.x}%,${from.y + 4.5}%`, `${to.x}%,${from.y + 4.5}%`, `${to.x}%,${targetY}%`];
+                            } else {
+                                // Default connection behavior - short direct line bridging the gap
+                                let startYOffset = 4.5; // Start directly below box edge
+                                let targetY = to.y - 3.0; // Stop precisely above next box edge
+
+                                // Direct vertical path for nodes within same column
+                                points = [`${from.x}%,${from.y + startYOffset}%`, `${from.x}%,${targetY}%`];
+
+                                // Small stubs for specific loop-backs or cross connections to avoid visual mess
+                                if (from.x !== to.x) {
+                                    // Cross column (like 11 to 5) - small sideways stub
+                                    const direction = to.x > from.x ? 1 : -1;
+                                    points = [`${from.x}%,${from.y + 2.5}%`, `${from.x + (direction * 4)}%,${from.y + 2.5}%`];
+                                } else if (from.y > to.y) {
+                                    // Loop back up (like 8 to 5) - small upward stub
+                                    points = [`${from.x}%,${from.y - 2.5}%`, `${from.x}%,${from.y - 7.0}%`];
+                                }
                             }
 
                             const segments = generateSegments(points);
@@ -104,7 +117,7 @@ export const Flowchart: React.FC<FlowchartProps> = ({ currentNodeId, onNodeTap, 
                                             markerEnd={sIdx === segments.length - 1 ? markerRef : undefined}
                                         />
                                     ))}
-                                    {edge.conditionLabel && (
+                                    {edge.conditionLabel && edge.fromNodeId !== 'BOX_1_START_CPR' && (
                                         <text
                                             x={segments[0].x2}
                                             y={segments[0].y2}
