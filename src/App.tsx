@@ -127,15 +127,6 @@ const App: React.FC = () => {
             <div className="flex items-center gap-1 md:gap-4">
               <h2 className="text-xl md:text-3xl font-bold tracking-widest" style={{ color: 'var(--color-neon-green)' }}>CodeVector</h2>
 
-              {/* Mobile Log Button */}
-              <button
-                onClick={() => dispatch({ type: 'TOGGLE_MOBILE_LOG' })}
-                className="md:hidden ml-1 px-3 py-1.5 bg-gray-900 border border-gray-700 hover:bg-gray-800 rounded text-[10px] uppercase font-bold tracking-wide transition-colors"
-                style={{ color: 'var(--color-neon-green)' }}
-              >
-                Log
-              </button>
-
               {/* View Mode Toggle */}
               <div className="hidden md:flex ml-2 bg-gray-900 rounded-lg p-1 border border-gray-800">
                 <button
@@ -172,6 +163,13 @@ const App: React.FC = () => {
               {state.cprTimerSecondsRemaining === 0 && (
                 <button onClick={() => dispatch({ type: 'COMPLETED_CPR_CYCLE' })} disabled={state.codeEnded} className="min-h-[36px] md:min-h-[40px] px-2 py-1 bg-blue-900 border border-blue-500 hover:bg-blue-800 text-blue-200 rounded text-[10px] md:text-xs font-bold transition-all animate-pulse">CONTINUE</button>
               )}
+              <button
+                onClick={() => dispatch({ type: 'TOGGLE_MOBILE_LOG' })}
+                className="md:hidden min-h-[36px] md:min-h-[40px] px-2 py-1 bg-gray-900 border-[1px] border-gray-700 hover:bg-gray-800 rounded text-[10px] md:text-xs uppercase font-bold tracking-wide transition-colors shadow-sm"
+                style={{ color: 'var(--color-neon-green)', borderColor: 'var(--color-neon-green)' }}
+              >
+                LOG
+              </button>
             </div>
           </div>
 

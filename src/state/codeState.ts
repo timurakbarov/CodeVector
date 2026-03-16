@@ -299,13 +299,14 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
             };
 
         case 'ADD_LOG': {
-            const logDetails = action.payload.details || '';
+            const logInput = action.payload.details || '';
             let eventTime = new Date();
-            let finalLabel = action.payload.label;
-            let finalDetails = logDetails;
+            let cleanText = logInput;
 
-            // Regex for HH:MM parsing (e.g. "04:19 IO access")
-            const timeMatch = logDetails.match(/^(\d{1,2}):(\d{2})\b\s*(.*)$/);
+            // Regex for HH:MM parsing anywhere in the string
+            const timeRegex = /\b(\d{1,2}):(\d{2})\b/;
+            const timeMatch = logInput.match(timeRegex);
+
             if (timeMatch) {
                 let hours = parseInt(timeMatch[1], 10);
                 const mins = parseInt(timeMatch[2], 10);
@@ -322,12 +323,13 @@ export const codeReducer: Reducer<CodeState, CodeAction> = (state, action) => {
                 }
                 eventTime.setHours(hours, mins, 0, 0);
 
-                finalLabel = "Manual Time Entry";
-                finalDetails = timeMatch[3].trim();
+                // Remove the time from the text
+                cleanText = logInput.replace(timeRegex, '').trim();
             }
 
-            const newEvent = createLog(finalLabel, finalDetails);
+            const newEvent = createLog(cleanText || action.payload.label);
             newEvent.timestamp = eventTime;
+            newEvent.details = undefined; // Do not show extra subtitle line for simple manual entries
 
             const newEvents = [...state.events, newEvent].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
