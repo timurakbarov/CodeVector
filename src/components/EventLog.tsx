@@ -67,7 +67,7 @@ export const EventLog: React.FC<EventLogProps> = ({ events, dispatch }) => {
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type clinical note..."
+                    placeholder="Log additional actions (e.g. 04:19 IO access)..."
                     className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none focus:border-indigo-500"
                 />
                 <button type="submit" disabled={!inputValue.trim()} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-800 disabled:text-gray-600 text-white p-2 rounded-lg transition-colors">
