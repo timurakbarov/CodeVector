@@ -49,7 +49,7 @@ export const PreCodeModal: React.FC<PreCodeModalProps> = ({ onStart }) => {
                             checked={fullCode}
                             onChange={(e) => setFullCode(e.target.checked)}
                         />
-                        <span className="text-lg">Confirm FULL CODE status (No DNR/DNI)</span>
+                        <span className="text-lg">Confirm FULL CODE status (No DNR/DNI) - Ask the nurse</span>
                     </label>
 
                     <label className="flex items-center gap-4 p-4 rounded-xl border border-gray-700 bg-gray-800/50 cursor-pointer hover:bg-gray-800 transition-colors">

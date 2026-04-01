@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LogEvent } from '../state/codeState';
 
 interface SummaryViewProps {
@@ -12,8 +12,33 @@ const formatTime = (date: Date) => {
 };
 
 export const SummaryView: React.FC<SummaryViewProps> = ({ events, onReset }) => {
+    const [showDebrief, setShowDebrief] = useState(true);
+
     // Determine if code ended due to ROSC
     const achievedRosc = events.length > 0 && events[events.length - 1].label.includes('ROSC');
+
+    if (showDebrief) {
+        return (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/95 backdrop-blur-md p-4">
+                <div className="bg-gray-900 border border-gray-700/80 rounded-2xl shadow-2xl max-w-lg w-full p-6 text-gray-100 flex flex-col gap-6 animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
+                    <h2 className="text-2xl font-bold tracking-widest text-center border-b border-gray-800 pb-4 text-white">Team Debriefing Checklist</h2>
+                    <ul className="space-y-4 text-xl text-gray-300 font-medium px-2">
+                        <li className="flex gap-3"><span className="text-gray-500">•</span>What went wrong?</li>
+                        <li className="flex gap-3"><span className="text-gray-500">•</span>What went well?</li>
+                        <li className="flex gap-3"><span className="text-gray-500">•</span>Key lessons learned</li>
+                    </ul>
+                    <div className="pt-6 mt-2 border-t border-gray-800 flex justify-center">
+                        <button 
+                            onClick={() => setShowDebrief(false)}
+                            className="px-10 py-3 bg-gray-800 border-2 border-gray-600 hover:bg-white hover:text-black hover:border-white rounded-full text-lg font-bold transition-all uppercase tracking-widest shadow-lg"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-black text-white p-4 md:p-8 overflow-y-auto">
